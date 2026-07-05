@@ -1,14 +1,11 @@
 """
 05_ingest_versions.py
-=====================
-Ingestion dei nodi Versione per OpenSearch.
 
 Legge il CSV prodotto dalla pipeline R e indicizza i documenti in due indici:
     - tkg_versions: tutte le versioni
     - tkg_vigenti: sole versioni vigenti
 
-Uso:
-    python3 05_ingest_versions.py output_neo4j/nodi_Versione.csv
+python3 05_ingest_versions.py output_neo4j/nodi_Versione.csv
 """
 
 import os
