@@ -11,5 +11,5 @@ Sfruttando l'integrazione tra database a grafo, vector embeddings e Large Langua
 
 *   **Linguaggi:** R, Python
 *   **Database & Ricerca:** Neo4j (Knowledge Graph), OpenSearch (Ricerca ibrida e vettoriale)
-*   **AI & NLP:** Ollama, LLaMA 3, Nomic-embed-text
+*   **AI & NLP:** Ollama, Mistral, Nomic-embed-text
 *   **Origine Dati:** API Open Data di Normattiva
