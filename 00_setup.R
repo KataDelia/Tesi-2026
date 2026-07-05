@@ -1,26 +1,33 @@
-required_packages <- c(
-  "here",
-  "dplyr",
-  "stringr",
-  "xml2",
-  "purrr",
-  "httr2",
-  "pbapply",
-  "lubridate",
-  "purrr",
-  "readr")
+# 00_setup.R
+# Gestione dipendenze del progetto
 
-# Installa solo quelli non ancora presenti
-missing_packages <- required_packages[
-  !required_packages %in% installed.packages()[, "Package"]
-]
+required_packages <- unique(c(
+  "here",       # gestione path relativi
+  "dplyr",      # manipolazione dati
+  "stringr",    # manipolazione stringhe
+  "xml2",       # parsing XML/HTML
+  "purrr",      # programmazione funzionale
+  "httr2",      # richieste HTTP
+  "pbapply",    # apply con progress bar
+  "lubridate",  # gestione date
+  "readr",      # importazione dati
+  "digest",     # hashing
+  "data.table", # manipolazione dati ad alte prestazioni
+  "future",     # parallelizzazione
+  "furrr",      # map parallele con purrr
+  "tibble",     # tibble per build_timeline
+  "memoise",    # cache in-memory per extract_akn_metadata
+  "parallelly"  # rilevamento core disponibili
+))
 
+if (!requireNamespace("pak", quietly = TRUE)) install.packages("pak")
+
+missing_packages <- setdiff(required_packages, installed.packages()[, "Package"])
 if (length(missing_packages) > 0) {
   message("Installazione pacchetti mancanti: ", paste(missing_packages, collapse = ", "))
-  install.packages(missing_packages, dependencies = TRUE)
+  pak::pak(missing_packages)
 } else {
   message("Tutti i pacchetti sono già installati.")
 }
 
-# Caricamento
 invisible(lapply(required_packages, library, character.only = TRUE))
