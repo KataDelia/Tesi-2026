@@ -1,72 +1,80 @@
-# Tesi-2026
+# Tesi-2026 — Modellazione della vigenza dinamica normativa
 
-Pipeline per la costruzione di un knowledge graph della normativa italiana a partire dai dati Open Data di Normattiva, con esportazione su Neo4j e interrogazione tramite chatbot.
+**Un approccio basato su grafi per il tracciamento storico della normativa italiana**
+
+Tesi di Delia Anamaria Bogdan
 
 ## Indice
 
-- [Descrizione del progetto](#descrizione-del-progetto)
+- [Contesto e obiettivo](#contesto-e-obiettivo)
+- [Architettura](#architettura)
 - [Struttura del repository](#struttura-del-repository)
-- [Pipeline di elaborazione](#pipeline-di-elaborazione)
-- [Componenti applicativi](#componenti-applicativi)
-- [Test](#test)
+- [Risultati principali](#risultati-principali)
+- [Limiti e sviluppi futuri](#limiti-e-sviluppi-futuri)
 - [Requisiti e installazione](#requisiti-e-installazione)
 - [Come eseguire la pipeline](#come-eseguire-la-pipeline)
 
-## Descrizione del progetto
+## Contesto e obiettivo
 
-[Contesto della tesi: obiettivo, dominio (dati normativi italiani / Normattiva), tecnologie principali (R, Python, Neo4j, ecc.), e cosa dimostra il progetto nel suo complesso.]
+La normativa italiana cambia di continuo: ogni legge nuova può abrogare, sostituire o integrare disposizioni precedenti, e la versione di un articolo in vigore oggi può essere l'ennesima di una lunga storia di modifiche. Normattiva conserva questa stratificazione, ma in un formato pensato per la consultazione umana, non per l'interrogazione automatica — e un modello linguistico interpellato su un articolo di legge risponde comunque, senza garanzia che la versione richiamata sia quella effettivamente vigente nel momento richiesto.
+
+L'obiettivo della tesi è progettare un sistema che risponda a domande sulla normativa italiana restando ancorato alle fonti ufficiali, trattando il tempo come parte della **struttura del dato** — non come qualcosa che si spera il modello linguistico interpreti correttamente da solo.
+
+## Architettura
+
+Il lavoro si articola in cinque fasi:
+
+**1. Acquisizione del corpus**
+40 codici nazionali in formato multivigente, scaricati dal portale Open Data di Normattiva (XML in standard Akoma Ntoso, con la storia completa di ogni articolo e le date di validità di ciascuna versione). Pipeline di download, validazione e normalizzazione, con meccanismo di aggiornamento incrementale per le modifiche future.
+
+**2. Temporal Knowledge Graph (Neo4j)**
+Il formato multivigente ripete il testo di un articolo ogni volta che una qualsiasi parte dell'atto viene modificata, anche se quello specifico articolo non è cambiato. Una fase di **delta detection** (confronto del testo normalizzato tra versioni consecutive, scarto dei duplicati) riduce le versioni parseate da ~2,9 milioni a **41.764** effettivamente distinte (fattore di compressione di circa 68x). Il grafo finale conta **18.091 nodi "Partizione"**, collegati alle rispettive versioni storiche, alle leggi modificanti e agli articoli citati.
+
+**3. Indice di ricerca ibrido (OpenSearch)**
+Ricerca lessicale BM25 + ricerca vettoriale su embedding multilingue Cohere (1.024 dimensioni). Due indici separati (uno per le versioni vigenti, uno per quelle storiche) per evitare che una norma abrogata compaia tra le risposte su cosa è in vigore oggi.
+
+**4. Sistema conversazionale (RAG)**
+Modello generativo locale (Mistral via Ollama). Pipeline: classificazione dell'intenzione → retrieval ibrido con fusione e reranking → arricchimento del contesto tramite le relazioni del grafo → generazione della risposta → controllo finale che verifica se ogni articolo citato compare davvero nel contesto recuperato (mitigazione delle allucinazioni).
+
+**5. Valutazione sperimentale**
+5 test set annotati a mano, 209 domande totali, per complessità crescente (da riferimenti espliciti a linguaggio colloquiale, incluse domande "evolutive" sulla storia di una disposizione). Metriche: MRR, Precision, Recall, nDCG su quattro configurazioni di retrieval.
 
 ## Struttura del repository
 
 ```
 Tesi-2026/
 ├── README.md
-├── 00_setup.R
-├── 00_functions.R
-├── 01_build_metadata.R
-├── 02_master_loop.R
-├── 03_export_neo4j.R
-├── 04_create_index.py
-├── 05_ingest_versions.py
-├── chatbot.py
-├── atto.py
-├── collezione.py
-├── Search_test.py
-└── test_risultati_20260705_17....csv
+├── 00_setup.R              # Inizializzazione ambiente R
+├── 00_functions.R          # Funzioni di utilità condivise
+├── 01_build_metadata.R     # Fase 1 — costruzione metadati del corpus
+├── 02_master_loop.R        # Fase 1/2 — ciclo di parsing/normalizzazione + delta detection [verificare]
+├── 03_export_neo4j.R       # Fase 2 — costruzione del Temporal Knowledge Graph
+├── 04_create_index.py      # Fase 3 — creazione indici ibridi su OpenSearch
+├── 05_ingest_versions.py   # Fase 3 — ingestione delle versioni deduplicate negli indici
+├── collezione.py           # Download delle collezioni preconfezionate da Normattiva OpenData
+├── atto.py                 # Rappresentazione/gestione del singolo atto normativo [verificare]
+├── chatbot.py              # Fase 4 — sistema conversazionale RAG
+├── Search_test.py          # Fase 5 — valutazione sperimentale (retrieval)
+└── test_risultati_20260705_17....csv   # Risultati di una sessione di test
 ```
 
-## Pipeline di elaborazione
+## Risultati principali
 
-Gli script numerati vanno eseguiti **in ordine**, dato che ciascuno si basa sull'output del precedente.
-
-| Script | Linguaggio | Descrizione |
+| Categoria di domanda | Metrica | Valore |
 |---|---|---|
-| `00_setup.R` | R | [Inizializza l'ambiente: librerie, connessioni, variabili globali] |
-| `00_functions.R` | R | [Funzioni di utilità condivise dagli altri script R] |
-| `01_build_metadata.R` | R | [Costruisce i metadati degli atti normativi a partire da ...] |
-| `02_master_loop.R` | R | [Ciclo principale che orchestra l'elaborazione di ... per ogni atto/collezione] |
-| `03_export_neo4j.R` | R | [Esporta i dati elaborati verso il database a grafo Neo4j] |
-| `04_create_index.py` | Python | [Crea l'indice (es. per ricerca semantica / full-text) su ...] |
-| `05_ingest_versions.py` | Python | [Carica le diverse versioni (multivigenza) degli atti in ...] |
+| Riferimenti espliciti (codice + articolo) | MRR | **0,983** |
+| Riferimenti espliciti + vincolo temporale | MRR | **0,936** |
+| Linguaggio colloquiale (config. migliore) | MRR | 0,777 |
 
-## Componenti applicativi
+- Sulle domande con riferimenti espliciti, il risultato è **stabile su tutte le configurazioni** di retrieval: conferma l'ipotesi centrale della tesi, ossia che ancorare la temporalità alla struttura del dato (e non all'interpretazione del modello linguistico) funziona in modo affidabile.
+- Sulle domande colloquiali, la strategia più efficace è l'**espansione per parole chiave**, che recupera la terminologia tecnica implicita in una formulazione informale.
+- **Contributo del Knowledge Graph**: non decisivo sulle domande a riferimento esplicito (dove il retrieval è già diretto per chiave), ma misurabile dove il retrieval è puramente semantico, fino a **+0,063 MRR** con espansione HyDE e **+0,367 Recall@10**. Il beneficio è maggiore proprio sulle domande più difficili (MRR di partenza < 0,5): **+0,075 di miglioramento medio**, con un solo caso su 49 in cui il grafo peggiora il risultato.
 
-Script indipendenti dalla pipeline, che utilizzano i dati prodotti:
-
-- **`chatbot.py`** — [Descrizione: es. interfaccia conversazionale per interrogare la base di conoscenza normativa costruita dalla pipeline]
-- **`atto.py`** — [Descrizione: es. gestione/rappresentazione di un singolo atto normativo]
-- **`collezione.py`** — [Descrizione: es. download e gestione delle collezioni preconfezionate da Normattiva]
-
-## Test
-
-- **`Search_test.py`** — [Cosa testa: es. verifica delle funzionalità di ricerca]
-- **`test_risultati_20260705_17....csv`** — [Output/risultati di una sessione di test del 5 luglio 2026]
 
 ## Requisiti e installazione
 
 ### R
 ```r
-# Pacchetti richiesti
 install.packages(c("[pacchetto1]", "[pacchetto2]", "..."))
 ```
 
@@ -74,33 +82,34 @@ install.packages(c("[pacchetto1]", "[pacchetto2]", "..."))
 ```bash
 pip install -r requirements.txt
 ```
+[Se non esiste ancora, va creato elencando almeno: client OpenSearch, client Neo4j, SDK Cohere per gli embedding, client Ollama.]
 
-[Se non esiste ancora un `requirements.txt`, elenca qui le librerie usate, es. requests, neo4j, ecc., e poi crea il file separatamente.]
-
-### Altri prerequisiti
-- [Istanza Neo4j attiva, con credenziali configurate in ...]
-- [Eventuale API key o configurazione per l'accesso a Normattiva OpenData]
+### Servizi esterni richiesti
+- **Neo4j** — istanza attiva per il Temporal Knowledge Graph
+- **OpenSearch** — istanza attiva per l'indice ibrido BM25 + vettoriale
+- **Ollama** con modello **Mistral** — per la generazione delle risposte
+- **Cohere API key** — per gli embedding multilingue (1.024 dimensioni)
 
 ## Come eseguire la pipeline
 
 ```bash
-# 1. Setup ambiente R
+# Fase 1 — Acquisizione corpus e metadati
 Rscript 00_setup.R
-
-# 2. Costruzione metadati
 Rscript 01_build_metadata.R
-
-# 3. Elaborazione principale
 Rscript 02_master_loop.R
 
-# 4. Esportazione su Neo4j
+# Fase 2 — Costruzione del Temporal Knowledge Graph
 Rscript 03_export_neo4j.R
 
-# 5. Creazione indice
+# Fase 3 — Indicizzazione ibrida
 python 04_create_index.py
-
-# 6. Ingestione versioni
 python 05_ingest_versions.py
+
+# Fase 4 — Avvio del sistema conversazionale
+python chatbot.py
+
+# Fase 5 — Valutazione
+python Search_test.py
 ```
 
 ---
