@@ -1,71 +1,86 @@
 """
 05_ingest_versions.py
 
-Legge il CSV prodotto dalla pipeline R e indicizza i documenti in due indici:
-    - tkg_versions: tutte le versioni
-    - tkg_vigenti: sole versioni vigenti
+Legge nodi_Versione.csv (prodotto dalla pipeline R su NIR/Normattiva)
+e indicizza i documenti in due indici OpenSearch:
+    - tkg_versions : tutte le versioni (storiche + vigenti)
+    - tkg_vigenti  : sole versioni con is_current=True (query rapide)
 
-python3 05_ingest_versions.py output_neo4j/nodi_Versione.csv
+Variabili d'ambiente richieste:
+    OS_PASS         password OpenSearch
+    COHERE_API_KEY  chiave API Cohere
+
+Uso:
+    python3 05_ingest_versions.py nodi_Versione.csv
+    python3 05_ingest_versions.py --refresh-vigenza
 """
 
-import os
-import sys
-import csv
-import json
-import time
-import re
-import requests
+import os, sys, csv, json, time, re, requests
 from datetime import date
 from typing import List, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import urllib3
+import cohere
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Configurazione
 
-OS_URL       = os.getenv("OS_URL",       "https://localhost:9200")
-OS_USER      = os.getenv("OS_USER",      "admin")
-OS_PASS      = os.getenv("OS_PASS",      "PasswordForte123")
-INDEX_ALL    = os.getenv("OS_INDEX",     "tkg_versions")  # indice completo
-INDEX_CUR    = os.getenv("OS_INDEX_CUR", "tkg_vigenti")   # indice vigenti
-OLLAMA_URL   = os.getenv("OLLAMA_URL",   "http://localhost:11434")
-EMBED_MODEL  = os.getenv("EMBED_MODEL",  "nomic-embed-text")
+OS_URL    = os.getenv("OS_URL",       "https://localhost:9200")
+OS_USER   = os.getenv("OS_USER",      "admin")
+OS_PASS   = os.getenv("OS_PASS")
+INDEX_ALL = os.getenv("OS_INDEX",     "tkg_versions")
+INDEX_CUR = os.getenv("OS_INDEX_CUR", "tkg_vigenti")
 
-BATCH_SIZE       = 20    # documenti per richiesta bulk verso OpenSearch
-EMBED_BATCH_SIZE = 10    # testi per chiamata batch a Ollama
-EMBED_WORKERS    = 3     # thread paralleli per l'embedding
-MAX_RETRY        = 3     # tentativi in caso di errore di rete
-RETRY_DELAY      = 2.0   # secondi tra un tentativo e il successivo (base)
+COHERE_API_KEY = os.getenv("COHERE_API_KEY")
+COHERE_MODEL   = "embed-multilingual-v3.0"
+EMBED_DIM      = 1024
+
+BATCH_SIZE       = 20   # documenti per richiesta bulk OpenSearch
+EMBED_BATCH_SIZE = 48   # testi per chiamata Cohere (rate limit trial: 100k token/min)
+EMBED_WORKERS    = 1    # worker singolo per rispettare il rate limit
+MAX_RETRY        = 3
+RETRY_DELAY      = 2.0
 CHECKPOINT_FILE  = "ingest_checkpoint.json"
 
-AUTH      = (OS_USER, OS_PASS)
-TODAY_INT = int(date.today().strftime("%Y%m%d"))
+if not OS_PASS:
+    print("ERRORE: variabile d'ambiente OS_PASS non impostata.")
+    sys.exit(1)
+
+AUTH = (OS_USER, OS_PASS)
+
+
+# Client Cohere (lazy)
+
+_cohere_client = None
+
+def get_cohere_client():
+    global _cohere_client
+    if _cohere_client is None:
+        if not COHERE_API_KEY:
+            print("ERRORE: variabile d'ambiente COHERE_API_KEY non impostata.")
+            sys.exit(1)
+        _cohere_client = cohere.Client(api_key=COHERE_API_KEY)
+    return _cohere_client
 
 
 # Checkpoint
 
 def load_checkpoint() -> set:
-    """Carica il set degli ID già indicizzati dal checkpoint."""
     if os.path.exists(CHECKPOINT_FILE):
         try:
-            with open(CHECKPOINT_FILE) as f:
-                return set(json.load(f))
+            return set(json.load(open(CHECKPOINT_FILE)))
         except Exception:
             pass
     return set()
 
-
 def save_checkpoint(ids: set) -> None:
-    """Salva il set degli ID indicizzati sul disco."""
-    with open(CHECKPOINT_FILE, "w") as f:
-        json.dump(list(ids), f)
+    json.dump(list(ids), open(CHECKPOINT_FILE, "w"))
 
 
-# Utilità date
+# Utilità
 
 def to_int_date(val) -> Optional[int]:
-    """Converte una data nel formato intero YYYYMMDD."""
     if val in (None, "", "NA", "0", 0):
         return None
     try:
@@ -77,123 +92,104 @@ def to_int_date(val) -> Optional[int]:
 
 # Gestione indici
 
-def verifica_indice(index_name: str) -> None:
-    """Verifica che l'indice esista; termina con errore se assente."""
-    r = requests.head(f"{OS_URL}/{index_name}", auth=AUTH, verify=False, timeout=10)
+def verifica_indice(name: str) -> None:
+    r = requests.head(f"{OS_URL}/{name}", auth=AUTH, verify=False, timeout=10)
     if r.status_code == 404:
-        print(f"ERRORE: indice '{index_name}' non trovato. Eseguire 04_create_index.py")
+        print(f"ERRORE: indice '{name}' non trovato. Eseguire 04_create_index.py")
         sys.exit(1)
 
-
-def crea_indice_se_mancante(index_name: str) -> None:
-    """Crea l'indice secondario copiando settings e mapping dal principale."""
-    r = requests.head(f"{OS_URL}/{index_name}", auth=AUTH, verify=False, timeout=10)
-    if r.status_code == 200:
-        print(f"  Indice '{index_name}' già esistente.")
+def crea_indice_se_mancante(name: str) -> None:
+    """Crea tkg_vigenti copiando mapping e settings da tkg_versions."""
+    if requests.head(f"{OS_URL}/{name}", auth=AUTH, verify=False, timeout=10).status_code == 200:
+        print(f"  Indice '{name}' già esistente.")
         return
-
-    r_full = requests.get(f"{OS_URL}/{INDEX_ALL}", auth=AUTH, verify=False, timeout=10)
-    if r_full.status_code != 200:
-        print(f"  ATTENZIONE: impossibile leggere il mapping da '{INDEX_ALL}'")
+    r = requests.get(f"{OS_URL}/{INDEX_ALL}", auth=AUTH, verify=False, timeout=10)
+    if r.status_code != 200:
+        print(f"  Impossibile leggere il mapping da '{INDEX_ALL}'")
         return
-
-    full          = r_full.json()[INDEX_ALL]
-    orig_settings = full.get("settings", {}).get("index", {})
-    orig_mappings = full.get("mappings", {})
-
+    src = r.json()[INDEX_ALL]
     payload = {
         "settings": {
             "index": {
-                "number_of_shards":        orig_settings.get("number_of_shards", "1"),
-                "number_of_replicas":      "0",
-                "knn":                     True,
-                "knn.algo_param.ef_search": 100
+                "number_of_shards":         src["settings"]["index"].get("number_of_shards", "1"),
+                "number_of_replicas":       "0",
+                "knn":                      True,
+                "knn.algo_param.ef_search": 200
             },
-            "analysis": orig_settings.get("analysis", {})
+            "analysis": src["settings"]["index"].get("analysis", {})
         },
-        "mappings": orig_mappings
+        "mappings": src["mappings"]
     }
-
-    rc = requests.put(f"{OS_URL}/{index_name}",
-                      json=payload, auth=AUTH, verify=False, timeout=30)
-    if rc.status_code == 200:
-        print(f"  Indice '{index_name}' creato.")
-    else:
-        print(f"  ATTENZIONE: impossibile creare '{index_name}': {rc.text}")
+    r = requests.put(f"{OS_URL}/{name}", json=payload, auth=AUTH, verify=False, timeout=30)
+    print(f"  Indice '{name}' {'creato.' if r.status_code == 200 else f'ERRORE: {r.text}'}")
 
 
 # Embedding
 
 def calcola_embedding_batch(testi: List[str]) -> List[List[float]]:
-    """Genera embedding batch con fallback su /api/embeddings."""
+    """Chiama Cohere embed con input_type=search_document e ritorna vettori 1024-dim."""
+    client     = get_cohere_client()
+    testi_norm = [t.replace("\n", " ").strip()[:8000] or "." for t in testi]
+
     for attempt in range(1, MAX_RETRY + 1):
         try:
-            try:
-                r = requests.post(
-                    f"{OLLAMA_URL}/api/embed",
-                    json={"model": EMBED_MODEL, "input": testi},
-                    timeout=120
-                )
-                r.raise_for_status()
-                embeddings = r.json()["embeddings"]
-            except requests.exceptions.HTTPError:
-                embeddings = []
-                for testo in testi:
-                    r2 = requests.post(
-                        f"{OLLAMA_URL}/api/embeddings",
-                        json={"model": EMBED_MODEL, "prompt": testo},
-                        timeout=90
-                    )
-                    r2.raise_for_status()
-                    embeddings.append(r2.json()["embedding"])
-
-            if len(embeddings) != len(testi):
-                raise ValueError(
-                    f"Embedding attesi: {len(testi)}, ricevuti: {len(embeddings)}"
-                )
-            return embeddings
-
+            time.sleep(1.5)   # rispetta il rate limit trial
+            resp = client.embed(
+                texts=testi_norm,
+                model=COHERE_MODEL,
+                input_type="search_document",
+                embedding_types=["float"]
+            )
+            embs = resp.embeddings.float
+            if len(embs) != len(testi):
+                raise ValueError(f"Embedding attesi {len(testi)}, ricevuti {len(embs)}")
+            return embs
         except Exception as e:
             if attempt < MAX_RETRY:
-                delay = RETRY_DELAY * (2 ** (attempt - 1))
-                time.sleep(delay)
+                time.sleep(RETRY_DELAY * (2 ** (attempt - 1)))
             else:
                 raise
 
 
-# Testo di embedding
+# Testo per embedding
 
 def build_embedding_text(d: dict) -> str:
-    """Costruisce il testo di embedding per ogni versione."""
+    """
+    Costruisce il testo che Cohere embedda per ogni versione.
+    Include tutti i segnali utili al retrieval semantico:
+    identificatore articolo, nomi alternativi dell'atto, vigenza, testo normativo.
+    """
+    numero        = d.get("numero", "")            or ""
+    codice_breve  = d.get("codice_breve_atto", "")  or ""
+    nome_comune   = d.get("nome_comune_atto", "")   or ""
+    denominazione = d.get("denominazione_comune","") or ""
+    alias         = d.get("alias_codice", "")       or ""
+    titolo_atto   = d.get("titolo_atto", "")        or ""
+    vd            = d.get("valido_dal", "")         or ""
+    va            = d.get("valido_al", "")          or ""
+    tipo_mod      = d.get("tipo_modifica", "")      or ""
+    stato_vig     = d.get("stato_vigenza", "")      or ""
+
     parts = []
-    numero       = d.get("numero", "") or ""
-    codice_breve = d.get("codice_breve_atto", "") or ""
-    nome_comune  = d.get("nome_comune_atto", "") or ""
-    titolo_atto  = d.get("titolo_atto", "") or ""
-    vd           = d.get("valido_dal") or d.get("valido_dal_raw", "")
-    va           = d.get("valido_al")  or d.get("valido_al_raw", "")
-    tipo_mod     = d.get("tipo_modifica", "") or ""
-    stato_norma  = d.get("stato_norma", "") or ""
 
     if numero:
-        id_str = numero
-        if codice_breve:  id_str += f" {codice_breve}"
-        elif nome_comune: id_str += f" — {nome_comune}"
-        elif titolo_atto: id_str += f" — {titolo_atto}"
-        parts.append(id_str)
+        tag = codice_breve or alias or nome_comune or denominazione or titolo_atto
+        parts.append(f"{numero} {tag}".strip() if tag else numero)
 
-    if nome_comune:   parts.append(nome_comune)
-    elif titolo_atto: parts.append(titolo_atto)
+    for n in sorted({x for x in [nome_comune, denominazione, alias] if x}):
+        parts.append(n)
 
     if vd and va:
-        va_str = "in vigore" if str(va) == "99991231" else f"fino al {va}"
+        if stato_vig == "ABROGATO":
+            va_str = f"abrogato, valido fino al {va}" if va != "99991231" else "abrogato"
+        elif stato_vig == "STORICO":
+            va_str = f"storico, fino al {va}"
+        else:
+            va_str = "in vigore" if va == "99991231" else f"fino al {va}"
         parts.append(f"Vigente dal {vd} {va_str}")
 
-    if tipo_mod and tipo_mod not in ("originale", ""):
+    if tipo_mod and tipo_mod != "originale":
         parts.append(f"Tipo modifica: {tipo_mod}")
-
-    if stato_norma and stato_norma != "ATTIVO":
-        parts.append(f"Stato: {stato_norma}")
 
     testo = d.get("testo_puro", "") or ""
     if testo:
@@ -202,120 +198,115 @@ def build_embedding_text(d: dict) -> str:
     return "\n\n".join(p for p in parts if p.strip())
 
 
-# Mapping documento OpenSearch
+# Costruzione documento OpenSearch
 
 def make_doc(d: dict, emb: List[float]) -> dict:
-    """Mappa un record del CSV nodi_Versione nel documento OpenSearch."""
-    vd = to_int_date(d.get("valido_dal") or d.get("valido_dal_raw"))
-    va = to_int_date(d.get("valido_al")  or d.get("valido_al_raw")) or 99991231
+    """
+    Mappa una riga CSV nel documento OpenSearch da indicizzare.
+    - partizione_id usa URN_base dal CSV (più affidabile del regex su versione_id)
+    - numero_puro include il suffisso bis/ter per evitare collisioni tra articoli
+    - is_current deriva da stato_vigenza, non dalle date (semantica NIR:
+      valido_al=99991231 su un ABROGATO significa "nessuna data esplicita")
+    - aliases popolato con sinonimi dell'atto per migliorare il recall BM25
+    """
+    vd = to_int_date(d.get("valido_dal"))
+    va = to_int_date(d.get("valido_al")) or 99991231
 
-    vd_s       = str(vd) if vd else None
-    va_s       = str(va)
-    is_current = (vd is not None and vd <= TODAY_INT <= va)
-
-    numero      = d.get("numero", "") or ""
-    numero_puro = re.search(r"\d+", numero)
-    numero_puro = numero_puro.group(0) if numero_puro else None
-
-    versione_id = (d.get("versione_id:ID(Versione)") or
-                   d.get("versione_id") or d.get("id"))
+    versione_id = d.get("versione_id:ID(Versione)") or d.get("versione_id") or d.get("id")
     if not versione_id:
         raise ValueError("versione_id mancante nel record")
 
-    partizione_id = d.get("partizione_id") or re.sub(r"_V\d+$", "", versione_id)
+    partizione_id = (d.get("URN_base") or d.get("partizione_id") or
+                     re.sub(r"_V\d+$", "", versione_id))
+
+    numero        = d.get("numero", "")           or ""
+    codice_breve  = d.get("codice_breve_atto","")  or ""
+    nome_comune   = d.get("nome_comune_atto","")   or ""
+    denominazione = d.get("denominazione_comune","") or ""
+    alias         = d.get("alias_codice","")       or ""
+    titolo_atto   = d.get("titolo_atto","")        or ""
+    stato_vig     = d.get("stato_vigenza","")      or ""
+
+    m = re.search(
+        r"(\d+(?:[\-\s](?:bis|ter|quater|quinquies|sexies|septies|octies))?)",
+        numero, re.IGNORECASE
+    )
+    numero_puro = m.group(1).lower().replace(" ", "-") if m else None
+
+    id_atto = codice_breve or alias or nome_comune or denominazione or titolo_atto
+    title   = f"{numero} {id_atto}".strip() if id_atto else numero
+    aliases = list({x for x in [alias, denominazione, nome_comune] if x})
 
     return {
-        "id":                versione_id,
-        "versione_id":       versione_id,
-        "art_id":            partizione_id,
-        "partizione_id":     partizione_id,
-        "num_versione":      int(d.get("num_versione") or 0),
-        "numero":            numero,
-        "numero_puro":       numero_puro,
-        "titolo_atto":       d.get("titolo_atto", "")       or "",
-        "nome_comune_atto":  d.get("nome_comune_atto", "")  or "",
-        "codice_breve_atto": d.get("codice_breve_atto", "") or "",
-        "atto_appartenenza": d.get("atto_appartenenza", "") or "",
-        "stato_norma":       d.get("stato_norma", "")       or "",
-        "stato_vigenza":     d.get("stato_vigenza", d.get("stato_temporale", "")) or "",
-        "tipo_modifica":     d.get("tipo_modifica", "")     or "",
-        "title":             f"{numero} — {d.get('titolo_atto', '') or ''}".strip(" —"),
-        "testo_puro":        d.get("testo_puro", "")        or "",
-        "aliases":           [],
-        "keywords":          [],
-        "valido_dal_dt":     vd_s,
-        "valido_al_dt":      va_s,
-        "valido_dal_raw":    vd,
-        "valido_al_raw":     va,
-        "year_from":         int(vd_s[:4]) if vd_s else None,
-        "year_to":           int(va_s[:4]),
-        "is_current":        is_current,
-        "embedding":         emb
+        "versione_id":          versione_id,
+        "partizione_id":        partizione_id,
+        "num_versione":         int(d.get("num_versione") or 0),
+        "numero":               numero,
+        "numero_puro":          numero_puro,
+        "title":                title,
+        "titolo_atto":          titolo_atto,
+        "nome_comune_atto":     nome_comune,
+        "codice_breve_atto":    codice_breve,
+        "denominazione_comune": denominazione,
+        "atto_appartenenza":    d.get("atto_appartenenza","") or "",
+        "stato_vigenza":        stato_vig,
+        "stato_norma":          d.get("stato_norma","")       or "",
+        "tipo_modifica":        d.get("tipo_modifica","")     or "",
+        "testo_puro":           d.get("testo_puro","")        or "",
+        "aliases":              aliases,
+        "valido_dal_raw":       vd,
+        "valido_al_raw":        va,
+        "is_current":           (stato_vig == "VIGENTE"),
+        "embedding":            emb
     }
 
 
 # Indicizzazione bulk
 
 def bulk_index(docs: List[dict], index_name: str) -> int:
-    """Invia un batch di documenti a OpenSearch tramite l'API _bulk."""
     lines = []
     for doc in docs:
-        lines.append(json.dumps(
-            {"index": {"_index": index_name, "_id": doc["id"]}},
-            ensure_ascii=False
-        ))
+        lines.append(json.dumps({"index": {"_index": index_name, "_id": doc["versione_id"]}},
+                                ensure_ascii=False))
         lines.append(json.dumps(doc, ensure_ascii=False))
-
-    body = "\n".join(lines) + "\n"
     r = requests.post(
         f"{OS_URL}/_bulk",
-        data=body.encode("utf-8"),
+        data=("\n".join(lines) + "\n").encode("utf-8"),
         headers={"Content-Type": "application/x-ndjson"},
         auth=AUTH, verify=False, timeout=300
     )
     r.raise_for_status()
     res = r.json()
-
     if res.get("errors"):
-        errori = [it["index"] for it in res["items"]
-                  if it.get("index", {}).get("error")]
+        errori = [it for it in res["items"] if it.get("index", {}).get("error")]
         return len(docs) - len(errori)
     return len(docs)
 
-
 def bulk_index_dual(docs_all: List[dict], docs_cur: List[dict]) -> tuple:
-    """
-    Invia i documenti verso entrambi gli indici in sequenza.
-    docs_all → tkg_versions (tutte le versioni)
-    docs_cur → tkg_vigenti  (sole versioni vigenti, sottoinsieme di docs_all)
-    """
     ok_all = bulk_index(docs_all, INDEX_ALL) if docs_all else 0
     ok_cur = bulk_index(docs_cur, INDEX_CUR) if docs_cur else 0
     return ok_all, ok_cur
 
 
-# Lettura file sorgente
+# Lettura CSV / JSONL
 
 def leggi_records(path: str):
-    """Legge il file sorgente e restituisce i record come dizionari."""
     ext = os.path.splitext(path)[1].lower()
     if ext == ".csv":
-        with open(path, "r", encoding="utf-8") as f:
-            for row in csv.DictReader(f):
-                yield dict(row)
+        with open(path, encoding="utf-8") as f:
+            yield from (dict(r) for r in csv.DictReader(f))
     else:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line:
                     raw = json.loads(line)
-                    yield raw["v"] if "v" in raw and isinstance(raw["v"], dict) else raw
+                    yield raw["v"] if isinstance(raw.get("v"), dict) else raw
 
 
 # Elaborazione chunk
 
 def processa_chunk(records: List[dict]) -> List[dict]:
-    """Elabora un chunk di record e scarta silenziosamente gli errori."""
     testi, validi = [], []
     for d in records:
         try:
@@ -325,13 +316,11 @@ def processa_chunk(records: List[dict]) -> List[dict]:
                 validi.append(d)
         except Exception:
             continue
-
     if not testi:
         return []
-
-    embeddings = calcola_embedding_batch(testi)
+    embs = calcola_embedding_batch(testi)
     docs = []
-    for d, emb in zip(validi, embeddings):
+    for d, emb in zip(validi, embs):
         try:
             docs.append(make_doc(d, emb))
         except Exception:
@@ -339,113 +328,132 @@ def processa_chunk(records: List[dict]) -> List[dict]:
     return docs
 
 
+# Aggiornamento vigenza senza nuovi embedding
+
+def refresh_vigenza() -> None:
+    """
+    Ricalcola is_current su tkg_versions e sincronizza tkg_vigenti.
+    Non chiama Cohere — riusa gli embedding già salvati.
+    Utile dopo aggiornamenti del CSV senza riffare l'ingest completo.
+    """
+    print(f"\nRefresh vigenza (nessuna chiamata Cohere)")
+    verifica_indice(INDEX_ALL)
+    crea_indice_se_mancante(INDEX_CUR)
+
+    script = {
+        "script": {
+            "lang":   "painless",
+            "source": "ctx._source.is_current = (ctx._source.stato_vigenza == 'VIGENTE');",
+        },
+        "query": {"match_all": {}}
+    }
+    r = requests.post(f"{OS_URL}/{INDEX_ALL}/_update_by_query?conflicts=proceed",
+                      json=script, auth=AUTH, verify=False, timeout=300)
+    r.raise_for_status()
+    print(f"  is_current aggiornato: {r.json().get('updated', 0)} documenti")
+
+    r = requests.post(f"{OS_URL}/_reindex",
+                      json={"source": {"index": INDEX_ALL, "query": {"term": {"is_current": True}}},
+                            "dest":   {"index": INDEX_CUR}},
+                      auth=AUTH, verify=False, timeout=300)
+    r.raise_for_status()
+    print(f"  Sincronizzati in '{INDEX_CUR}': {r.json().get('total', 0)} documenti")
+
+    r = requests.post(f"{OS_URL}/{INDEX_CUR}/_delete_by_query",
+                      json={"query": {"term": {"is_current": False}}},
+                      auth=AUTH, verify=False, timeout=300)
+    r.raise_for_status()
+    print(f"  Rimossi da '{INDEX_CUR}': {r.json().get('deleted', 0)} documenti non vigenti\n")
+
+
 # Pipeline principale
 
 def run(path: str) -> None:
-    """Esegue la pipeline di ingestion completa."""
-    print(f"\nAvvio ingestion da: {path}")
-    print(f"  Indice completo  : {INDEX_ALL}")
-    print(f"  Indice vigenti   : {INDEX_CUR}")
-    print(f"  Batch embedding  : {EMBED_BATCH_SIZE} testi/chiamata Ollama")
-    print(f"  Worker paralleli : {EMBED_WORKERS}\n")
+    print(f"\nIngest da: {path}")
+    print(f"  Indice completo : {INDEX_ALL}")
+    print(f"  Indice vigenti  : {INDEX_CUR}")
+    print(f"  Embedding model : {COHERE_MODEL} ({EMBED_DIM} dim)\n")
 
     verifica_indice(INDEX_ALL)
     crea_indice_se_mancante(INDEX_CUR)
 
-    already_done = load_checkpoint()
-    if already_done:
-        print(f"  Checkpoint: {len(already_done)} documenti già indicizzati.\n")
+    done    = load_checkpoint()
+    records = [r for r in leggi_records(path)
+               if (r.get("versione_id") or r.get("versione_id:ID(Versione)") or "")
+               not in done]
+    n_tot   = len(records)
+    print(f"  Da indicizzare: {n_tot} (già fatti: {len(done)})\n")
 
-    all_records = list(leggi_records(path))
-    n_tot       = len(all_records)
-    all_records = [
-        r for r in all_records
-        if (r.get("versione_id") or r.get("versione_id:ID(Versione)") or "")
-        not in already_done
-    ]
-    print(f"  Record totali    : {n_tot}")
-    print(f"  Da indicizzare   : {len(all_records)}\n")
-
-    total_ok_all = 0
-    total_ok_cur = 0
-    total_err    = 0
-    t_start      = time.time()
-    done_ids     = set(already_done)
+    ok_all = ok_cur = err = 0
+    t0     = time.time()
+    done_ids: set = set(done)
     buf_all: List[dict] = []
     buf_cur: List[dict] = []
 
-    def flush() -> None:
-        """Svuota i buffer inviando i documenti rimanenti a OpenSearch."""
-        nonlocal total_ok_all, total_ok_cur, total_err
-        if buf_all or buf_cur:
-            ok_a, ok_c = bulk_index_dual(buf_all, buf_cur)
-            total_ok_all += ok_a
-            total_ok_cur += ok_c
-            total_err    += len(buf_all) - ok_a
-            for doc in buf_all:
-                done_ids.add(doc["id"])
-            buf_all.clear()
-            buf_cur.clear()
+    def flush():
+        nonlocal ok_all, ok_cur, err
+        if not buf_all:
+            return
+        a, c = bulk_index_dual(buf_all, buf_cur)
+        ok_all += a; ok_cur += c; err += len(buf_all) - a
+        for doc in buf_all:
+            done_ids.add(doc["versione_id"])
+        buf_all.clear(); buf_cur.clear()
 
-    chunks = [
-        all_records[i:i + EMBED_BATCH_SIZE]
-        for i in range(0, len(all_records), EMBED_BATCH_SIZE)
-    ]
+    chunks  = [records[i:i+EMBED_BATCH_SIZE] for i in range(0, n_tot, EMBED_BATCH_SIZE)]
+    futures = {ThreadPoolExecutor(max_workers=EMBED_WORKERS)
+               .submit(processa_chunk, c): c for c in chunks}
 
-    with ThreadPoolExecutor(max_workers=EMBED_WORKERS) as executor:
-        futures = {executor.submit(processa_chunk, c): c for c in chunks}
+    for idx, future in enumerate(as_completed(futures), 1):
+        try:
+            docs = future.result()
+        except Exception as e:
+            print(f"  [Chunk {idx}] Errore: {e}")
+            err += len(futures[future])
+            continue
 
-        for idx, future in enumerate(as_completed(futures), 1):
-            try:
-                docs = future.result()
-            except Exception as e:
-                print(f"  [Chunk {idx}] Errore: {e}")
-                total_err += len(futures[future])
-                continue
+        for doc in docs:
+            buf_all.append(doc)
+            if doc["is_current"]:
+                buf_cur.append(doc)
 
-            for doc in docs:
-                buf_all.append(doc)
-                if doc.get("is_current"):
-                    buf_cur.append(doc)
+        while len(buf_all) >= BATCH_SIZE:
+            to_all = buf_all[:BATCH_SIZE]
+            to_cur = [d for d in to_all if d["is_current"]]
+            buf_all[:] = buf_all[BATCH_SIZE:]
+            buf_cur[:] = [d for d in buf_cur if d not in to_all]
+            a, c = bulk_index_dual(to_all, to_cur)
+            ok_all += a; ok_cur += c; err += len(to_all) - a
+            for doc in to_all:
+                done_ids.add(doc["versione_id"])
 
-            # Flush buffer
-            while len(buf_all) >= BATCH_SIZE:
-                to_all = buf_all[:BATCH_SIZE]
-                to_cur = [d for d in to_all if d.get("is_current")]
-                buf_all[:] = buf_all[BATCH_SIZE:]
-                buf_cur[:] = [d for d in buf_cur if d not in to_all]
-                ok_a, ok_c = bulk_index_dual(to_all, to_cur)
-                total_ok_all += ok_a
-                total_ok_cur += ok_c
-                total_err    += len(to_all) - ok_a
-                for doc in to_all:
-                    done_ids.add(doc["id"])
-
-            # Progresso e checkpoint
-            if idx % 10 == 0:
-                elapsed = time.time() - t_start
-                vel     = total_ok_all / elapsed if elapsed > 0 else 0
-                print(f"  [{idx * EMBED_BATCH_SIZE:6d}/{len(all_records)}] "
-                      f"all={total_ok_all} cur={total_ok_cur} "
-                      f"err={total_err} | {vel:.1f} doc/s")
-                save_checkpoint(done_ids)
+        if idx % 10 == 0:
+            vel = ok_all / (time.time() - t0)
+            print(f"  [{idx*EMBED_BATCH_SIZE:6d}/{n_tot}] "
+                  f"all={ok_all} cur={ok_cur} err={err} | {vel:.1f} doc/s")
+            save_checkpoint(done_ids)
 
     flush()
     save_checkpoint(done_ids)
-
-    elapsed = time.time() - t_start
+    elapsed = time.time() - t0
     print(f"""
-=== Ingestion completata ===
-  Indicizzati (tkg_versions) : {total_ok_all}
-  Indicizzati (tkg_vigenti)  : {total_ok_cur}
-  Scartati                   : {total_err}
-  Tempo totale               : {elapsed:.1f}s
-  Velocità media             : {total_ok_all / elapsed:.1f} doc/s
+=== Ingest completato ===
+  tkg_versions : {ok_all}
+  tkg_vigenti  : {ok_cur}
+  Scartati     : {err}
+  Tempo        : {elapsed:.1f}s  ({ok_all/elapsed:.1f} doc/s)
 """)
 
 
+# Entry point
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Uso: python3 05_ingest_versions.py <file.csv|file.jsonl>")
+        print("Uso:")
+        print("  python3 05_ingest_versions.py <file.csv|file.jsonl>")
+        print("  python3 05_ingest_versions.py --refresh-vigenza")
         sys.exit(1)
-    run(sys.argv[1])
+    if sys.argv[1] == "--refresh-vigenza":
+        refresh_vigenza()
+    else:
+        run(sys.argv[1])
