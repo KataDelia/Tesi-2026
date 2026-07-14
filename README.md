@@ -25,36 +25,39 @@ L'obiettivo della tesi è progettare un sistema che risponda a domande sulla nor
 Il lavoro si articola in cinque fasi:
 
 **1. Acquisizione del corpus**
-40 codici nazionali in formato multivigente, scaricati dal portale Open Data di Normattiva (XML in standard Akoma Ntoso, con la storia completa di ogni articolo e le date di validità di ciascuna versione). Pipeline di download, validazione e normalizzazione, con meccanismo di aggiornamento incrementale per le modifiche future.
+40 codici nazionali in formato multivigente, scaricati dal portale Open Data di Normattiva tramite `collezione.py`. Ogni documento XML è marcato secondo lo standard Akoma Ntoso e contiene la storia completa di ciascun articolo con le date di validità di ogni versione. La pipeline valida l'integrità dei file e segnala le discrepanze tra URN da cartella e URN da XML.
 
-**2. Temporal Knowledge Graph (Neo4j)**
-Il formato multivigente ripete il testo di un articolo ogni volta che una qualsiasi parte dell'atto viene modificata, anche se quello specifico articolo non è cambiato. Una fase di **delta detection** (confronto del testo normalizzato tra versioni consecutive, scarto dei duplicati) riduce le versioni parseate da ~2,9 milioni a **41.764** effettivamente distinte (fattore di compressione di circa 68x). Il grafo finale conta **18.091 nodi "Partizione"**, collegati alle rispettive versioni storiche, alle leggi modificanti e agli articoli citati.
+**2. Costruzione dei metadati e parsing XML**
+`01_build_metadata.R` estrae in parallelo i metadati di ciascun atto (URN NIR, ELI, titolo AKN, date di vigenza) e costruisce il dataframe principale. `02_master_loop.R` itera su ogni atto, ne analizza il formato Akoma Ntoso e produce nodi e archi per Neo4j, scrivendo output parziali su disco per ogni atto elaborato.
 
-**3. Indice di ricerca ibrido (OpenSearch)**
-Ricerca lessicale BM25 + ricerca vettoriale su embedding multilingue Cohere (1.024 dimensioni). Due indici separati (uno per le versioni vigenti, uno per quelle storiche) per evitare che una norma abrogata compaia tra le risposte su cosa è in vigore oggi.
+**3. Temporal Knowledge Graph (Neo4j)**
+Il formato multivigente ripete il testo di un articolo ogni volta che una qualsiasi parte dell'atto viene modificata, anche se quell'articolo specifico non è cambiato. La **delta detection** in `03_export_neo4j.R` confronta il testo normalizzato (fingerprint alfanumerico) tra versioni consecutive e scarta i duplicati, riducendo le versioni da ~2,9 milioni a **41.764** effettivamente distinte — un fattore di compressione di circa 68x. Il grafo finale conta **18.091 nodi Partizione**, collegati alle rispettive versioni storiche, alle leggi modificanti e agli articoli citati, tramite relazioni tipizzate: `HA_VERSIONE`, `EVOLVE_IN`, `ABROGATO_DA`, `CITA`, `CITA_ATTO`, `RIMANDA_A`, `APPARTIENE`, `SOTTO_PARTIZIONE`.
 
-**4. Sistema conversazionale (RAG)**
-Modello generativo locale (Mistral via Ollama). Pipeline: classificazione dell'intenzione → retrieval ibrido con fusione e reranking → arricchimento del contesto tramite le relazioni del grafo → generazione della risposta → controllo finale che verifica se ogni articolo citato compare davvero nel contesto recuperato (mitigazione delle allucinazioni).
+**4. Indice di ricerca ibrido (OpenSearch)**
+`04_create_index.py` costruisce due indici separati — uno per le versioni vigenti, uno per quelle storiche — per evitare che una norma abrogata compaia tra le risposte su cosa è in vigore oggi. `05_ingest_versions.py` indicizza le versioni deduplicate combinando ricerca lessicale BM25 e ricerca vettoriale su embedding multilingue Cohere a 1.024 dimensioni.
 
-**5. Valutazione sperimentale**
-5 test set annotati a mano, 209 domande totali, per complessità crescente (da riferimenti espliciti a linguaggio colloquiale, incluse domande "evolutive" sulla storia di una disposizione). Metriche: MRR, Precision, Recall, nDCG su quattro configurazioni di retrieval.
+**5. Sistema conversazionale (RAG)**
+`chatbot.py` implementa un sistema RAG con modello generativo locale (Mistral via Ollama). La pipeline prevede: classificazione dell'intenzione → retrieval ibrido con fusione e reranking → arricchimento del contesto tramite le relazioni del grafo → generazione della risposta → controllo finale che verifica se ogni articolo citato compare davvero nel contesto recuperato (mitigazione delle allucinazioni).
+
+**6. Valutazione sperimentale**
+`Search_test.py` esegue la valutazione su 5 test set annotati a mano (209 domande totali) per complessità crescente: da riferimenti espliciti a linguaggio colloquiale, incluse domande evolutive sulla storia di una disposizione. Metriche: MRR, Precision, Recall, nDCG su quattro configurazioni di retrieval.
 
 ## Struttura del repository
 
 ```
 Tesi-2026/
 ├── README.md
-├── 00_setup.R              # Inizializzazione ambiente R
-├── 00_functions.R          # Funzioni di utilità condivise
-├── 01_build_metadata.R     # Fase 1 — costruzione metadati del corpus
-├── 02_master_loop.R        # Fase 1/2 — ciclo di parsing/normalizzazione + delta detection [verificare]
-├── 03_export_neo4j.R       # Fase 2 — costruzione del Temporal Knowledge Graph
-├── 04_create_index.py      # Fase 3 — creazione indici ibridi su OpenSearch
-├── 05_ingest_versions.py   # Fase 3 — ingestione delle versioni deduplicate negli indici
-├── collezione.py           # Download delle collezioni preconfezionate da Normattiva OpenData
-├── atto.py                 # Rappresentazione/gestione del singolo atto normativo [verificare]
-├── chatbot.py              # Fase 4 — sistema conversazionale RAG
-├── Search_test.py          # Fase 5 — valutazione sperimentale (retrieval)
+├── 00_setup.R              # Installazione e caricamento dipendenze R
+├── 00_functions.R          # Costanti, pattern e funzioni condivise (AKN, URN, timeline, delta)
+├── 01_build_metadata.R     # Estrazione metadati, validazione URN, pre-check XML
+├── 02_master_loop.R        # Parsing XML, costruzione nodi e archi, output CSV parziali
+├── 03_export_neo4j.R       # Delta detection, generazione archi temporali, export CSV definitivo
+├── 04_create_index.py      # Creazione indici ibridi su OpenSearch (BM25 + vettoriale)
+├── 05_ingest_versions.py   # Ingestione versioni deduplicate negli indici
+├── collezione.py           # Download collezioni preconfezionate da Normattiva OpenData
+├── atto.py                 # Gestione del singolo atto normativo
+├── chatbot.py              # Sistema conversazionale RAG (Mistral via Ollama)
+├── Search_test.py          # Valutazione sperimentale del retrieval
 └── test_risultati_20260705_17....csv   # Risultati di una sessione di test
 ```
 
@@ -74,15 +77,22 @@ Tesi-2026/
 ## Requisiti e installazione
 
 ### R
+
 ```r
-install.packages(c("[pacchetto1]", "[pacchetto2]", "..."))
+# Il file 00_setup.R installa automaticamente i pacchetti mancanti tramite pak.
+# In alternativa, installazione manuale:
+install.packages(c(
+  "here", "dplyr", "stringr", "xml2", "purrr", "httr2",
+  "pbapply", "lubridate", "readr", "digest", "data.table",
+  "future", "furrr", "tibble", "memoise", "parallelly"
+))
 ```
 
 ### Python
+
 ```bash
 pip install -r requirements.txt
 ```
-[Se non esiste ancora, va creato elencando almeno: client OpenSearch, client Neo4j, SDK Cohere per gli embedding, client Ollama.]
 
 ### Servizi esterni richiesti
 - **Neo4j** — istanza attiva per il Temporal Knowledge Graph
@@ -93,23 +103,27 @@ pip install -r requirements.txt
 ## Come eseguire la pipeline
 
 ```bash
-# Fase 1 — Acquisizione corpus e metadati
+# 1. Setup dipendenze R
 Rscript 00_setup.R
+
+# 2. Estrazione metadati e parsing XML
 Rscript 01_build_metadata.R
 Rscript 02_master_loop.R
 
-# Fase 2 — Costruzione del Temporal Knowledge Graph
+# 3. Delta detection ed export CSV per Neo4j
 Rscript 03_export_neo4j.R
 
-# Fase 3 — Indicizzazione ibrida
+# 4. Creazione indici e ingestione su OpenSearch
 python 04_create_index.py
 python 05_ingest_versions.py
 
-# Fase 4 — Avvio del sistema conversazionale
+# 5. Avvio del sistema conversazionale
 python chatbot.py
 
-# Fase 5 — Valutazione
+# 6. Valutazione sperimentale
 python Search_test.py
 ```
+
+---
 
 ---
