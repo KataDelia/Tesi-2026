@@ -1,4 +1,4 @@
-# Tesi-2026 — Modellazione della vigenza dinamica normativa
+# Tesi-2026: Modellazione della vigenza dinamica normativa
 
 **Un approccio basato su grafi per il tracciamento storico della normativa italiana**
 
