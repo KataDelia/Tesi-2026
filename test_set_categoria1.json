@@ -1,0 +1,162 @@
+[
+  {
+    "domanda": "Cosa stabilisce l'articolo 1 del Codice Penale?",
+    "rilevanti": [{"numero_puro": "1", "codice_breve_atto": "c.p.", "grado": 3}]
+  },
+  {
+    "domanda": "Come è disciplinato l'articolo 112 nel Codice di Procedura Civile?",
+    "rilevanti": [{"numero_puro": "112", "codice_breve_atto": "c.p.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Quali sono i presupposti previsti dall'articolo 15 del Codice Penale Militare di Guerra?",
+    "rilevanti": [{"numero_puro": "15", "codice_breve_atto": "c.p.m.g.", "grado": 3}]
+  },
+  {
+    "domanda": "Fammi un riassunto dell'articolo 47 del Codice Penale Militare di Pace.",
+    "rilevanti": [{"numero_puro": "47", "codice_breve_atto": "c.p.m.p.", "grado": 3}]
+  },
+  {
+    "domanda": "Spiegami l'articolo 22 delle Disposizioni per l'attuazione del Codice di Procedura Civile.",
+    "rilevanti": [{"numero_puro": "22", "codice_breve_atto": "disp. att. c.p.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Cosa prevede l'articolo 2043 del Codice Civile?",
+    "rilevanti": [{"numero_puro": "2043", "codice_breve_atto": "c.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Qual è il contenuto dell'articolo 1 delle Disposizioni per l'attuazione del Codice Civile?",
+    "rilevanti": [{"numero_puro": "1", "codice_breve_atto": "disp. att. c.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Indicami cosa dice l'articolo 135 del Regolamento per l'esecuzione del Codice della Navigazione.",
+    "rilevanti": [{"numero_puro": "135", "codice_breve_atto": "reg. cod. nav.", "grado": 3}]
+  },
+  {
+    "domanda": "Quali regole detta l'articolo 12 del Regolamento per l'esecuzione del Codice della Navigazione?",
+    "rilevanti": [{"numero_puro": "12", "codice_breve_atto": "reg. cod. nav.", "grado": 3}]
+  },
+  {
+    "domanda": "Che obblighi descrive l'articolo 4 del Codice postale e delle telecomunicazioni?",
+    "rilevanti": [{"numero_puro": "4", "codice_breve_atto": "cod. post.", "grado": 3}]
+  },
+  {
+    "domanda": "Elencami i commi dell'articolo 3 del Codice di Procedura Penale.",
+    "rilevanti": [{"numero_puro": "3", "codice_breve_atto": "c.p.p. 1988", "grado": 3}]
+  },
+  {
+    "domanda": "Trova l'articolo 120 nel Regolamento di esecuzione e attuazione del Codice della Strada.",
+    "rilevanti": [{"numero_puro": "120", "codice_breve_atto": "reg. c.d.s.", "grado": 3}]
+  },
+  {
+    "domanda": "In cosa consiste l'articolo 8 del Regolamento di esecuzione ed attuazione del Codice dei contratti pubblici?",
+    "rilevanti": [{"numero_puro": "8", "codice_breve_atto": "reg. contr. pubbl.", "grado": 3}]
+  },
+  {
+    "domanda": "Cosa regola l'articolo 15 delle Norme di attuazione e di coordinamento del Codice di Procedura Penale?",
+    "rilevanti": [{"numero_puro": "15", "codice_breve_atto": "norme att. c.p.p.", "grado": 3}]
+  },
+  {
+    "domanda": "Quali sono i limiti descritti dall'articolo 142 del Nuovo Codice della Strada?",
+    "rilevanti": [{"numero_puro": "142", "codice_breve_atto": "c.d.s.", "grado": 3}]
+  },
+  {
+    "domanda": "Dammi il testo dell'articolo 2 sulle Disposizioni sul processo tributario.",
+    "rilevanti": [{"numero_puro": "2", "codice_breve_atto": "d.lgs. 546/92", "grado": 3}]
+  },
+  {
+    "domanda": "Cosa disciplina l'articolo 13 del Codice della Privacy?",
+    "rilevanti": [{"numero_puro": "13", "codice_breve_atto": "cod. privacy", "grado": 3}]
+  },
+  {
+    "domanda": "Spiegami l'articolo 70 del Codice delle comunicazioni elettroniche.",
+    "rilevanti": [{"numero_puro": "70", "codice_breve_atto": "c.c.e.", "grado": 3}]
+  },
+  {
+    "domanda": "Qual è la definizione di bene culturale secondo l'articolo 10 del Codice dei beni culturali e del paesaggio?",
+    "rilevanti": [{"numero_puro": "10", "codice_breve_atto": "cod. beni cult.", "grado": 3}]
+  },
+  {
+    "domanda": "Cosa impone l'articolo 45 del Codice della proprietà industriale?",
+    "rilevanti": [{"numero_puro": "45", "codice_breve_atto": "c.p.i.", "grado": 3}]
+  },
+  {
+    "domanda": "Recupera l'articolo 20 del Codice dell'amministrazione digitale (CAD).",
+    "rilevanti": [{"numero_puro": "20", "codice_breve_atto": "c.a.d.", "grado": 3}]
+  },
+  {
+    "domanda": "Che indicazioni dà l'articolo 18 del Codice della nautica da diporto?",
+    "rilevanti": [{"numero_puro": "18", "codice_breve_atto": "cod. nautica", "grado": 3}]
+  },
+  {
+    "domanda": "Cosa garantisce l'articolo 33 del Codice del consumo?",
+    "rilevanti": [{"numero_puro": "33", "codice_breve_atto": "cod. consumo", "grado": 3}]
+  },
+  {
+    "domanda": "Quali informazioni richiede l'articolo 132 del Codice delle assicurazioni private?",
+    "rilevanti": [{"numero_puro": "132", "codice_breve_atto": "cod. ass.", "grado": 3}]
+  },
+  {
+    "domanda": "Mostrami il testo dell'articolo 575 del Codice Penale.",
+    "rilevanti": [{"numero_puro": "575", "codice_breve_atto": "c.p.", "grado": 3}]
+  },
+  {
+    "domanda": "Come funziona l'articolo 183 del Codice di Procedura Civile?",
+    "rilevanti": [{"numero_puro": "183", "codice_breve_atto": "c.p.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Cosa si evince dall'articolo 1473 del Codice Civile?",
+    "rilevanti": [{"numero_puro": "1473", "codice_breve_atto": "c.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Ricerca l'articolo 186 del Nuovo Codice della Strada.",
+    "rilevanti": [{"numero_puro": "186", "codice_breve_atto": "c.d.s.", "grado": 3}]
+  },
+  {
+    "domanda": "Quali sanzioni prevede l'articolo 167 del Codice della Privacy?",
+    "rilevanti": [{"numero_puro": "167", "codice_breve_atto": "cod. privacy", "grado": 3}]
+  },
+  {
+    "domanda": "Fammi leggere l'articolo 130 del Codice del consumo.",
+    "rilevanti": [{"numero_puro": "130", "codice_breve_atto": "cod. consumo", "grado": 3}]
+  },
+  {
+    "domanda": "Forniscimi i dettagli dell'articolo 21 del Codice dell'amministrazione digitale (CAD).",
+    "rilevanti": [{"numero_puro": "21", "codice_breve_atto": "c.a.d.", "grado": 3}]
+  },
+  {
+    "domanda": "Cosa prescrive l'articolo 141 del Codice delle assicurazioni private?",
+    "rilevanti": [{"numero_puro": "141", "codice_breve_atto": "cod. ass.", "grado": 3}]
+  },
+  {
+    "domanda": "Cerca il testo dell'articolo 84 del Codice della proprietà industriale.",
+    "rilevanti": [{"numero_puro": "84", "codice_breve_atto": "c.p.i.", "grado": 3}]
+  },
+  {
+    "domanda": "Analizza l'articolo 146 del Codice dei beni culturali e del paesaggio.",
+    "rilevanti": [{"numero_puro": "146", "codice_breve_atto": "cod. beni cult.", "grado": 3}]
+  },
+  {
+    "domanda": "Qual è il principio alla base dell'articolo 250 del Regolamento di esecuzione e attuazione del Codice della Strada?",
+    "rilevanti": [{"numero_puro": "250", "codice_breve_atto": "reg. c.d.s.", "grado": 3}]
+  },
+  {
+    "domanda": "Richiamo all'articolo 111 delle Norme di attuazione e di coordinamento del Codice di Procedura Penale.",
+    "rilevanti": [{"numero_puro": "111", "codice_breve_atto": "norme att. c.p.p.", "grado": 3}]
+  },
+  {
+    "domanda": "Estrai le direttive dell'articolo 300 del Codice di Procedura Civile.",
+    "rilevanti": [{"numero_puro": "300", "codice_breve_atto": "c.p.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Cosa enuncia l'articolo 640 del Codice Penale?",
+    "rilevanti": [{"numero_puro": "640", "codice_breve_atto": "c.p.", "grado": 3}]
+  },
+  {
+    "domanda": "Ripercorri l'articolo 1142 del Codice Civile.",
+    "rilevanti": [{"numero_puro": "1142", "codice_breve_atto": "c.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Documentami sull'articolo 50 delle Disposizioni sul processo tributario.",
+    "rilevanti": [{"numero_puro": "50", "codice_breve_atto": "d.lgs. 546/92", "grado": 3}]
+  }
+]

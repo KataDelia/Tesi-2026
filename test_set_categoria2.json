@@ -1,0 +1,148 @@
+[
+  {
+    "domanda": "Se crolla un pezzo del tetto del mio vicino e mi ammacca l'auto, lui è obbligato a pagarmi i danni in base a quanto previsto dal Codice Civile?",
+    "rilevanti": [{"numero_puro": "2053", "codice_breve_atto": "c.c.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.c.", "grado": 1}]
+  },
+  {
+    "domanda": "Se qualcuno mi aggredisce per strada e io mi difendo colpendolo, a quali condizioni il Codice Penale riconosce la legittima difesa?",
+    "rilevanti": [{"numero_puro": "52",   "codice_breve_atto": "c.p.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.", "grado": 1}]
+  },
+  {
+    "domanda": "Nel Codice della Strada, quali sono le sanzioni esatte se vengo fermato a un posto di blocco e l'etilometro segna che sto guidando ubriaco?",
+    "rilevanti": [{"numero_puro": "186",  "codice_breve_atto": "c.d.s.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.d.s.", "grado": 1}]
+  },
+  {
+    "domanda": "Ho comprato un maglione online ma non mi sta bene, il Codice del Consumo mi dà il diritto di restituirlo al venditore senza dover dare spiegazioni?",
+    "rilevanti": [{"numero_puro": "52",   "codice_breve_atto": "cod. consumo", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. consumo", "grado": 1}]
+  },
+  {
+    "domanda": "Nel Codice della Privacy, a quali condizioni posso continuare a mandare email pubblicitarie a un cliente che ha già acquistato da me senza chiedergli un nuovo consenso esplicito?",
+    "rilevanti": [{"numero_puro": "130",  "codice_breve_atto": "cod. privacy", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. privacy", "grado": 1}]
+  },
+  {
+    "domanda": "Fino a quale limite massimo di valore in denaro posso fare una causa direttamente davanti al Giudice di Pace secondo il Codice di Procedura Civile?",
+    "rilevanti": [{"numero_puro": "7",    "codice_breve_atto": "c.p.c.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.c.", "grado": 1}]
+  },
+  {
+    "domanda": "Per quali tipi di reati il giudice ha il potere di autorizzare le intercettazioni telefoniche in base al Codice di Procedura Penale?",
+    "rilevanti": [{"numero_puro": "266",  "codice_breve_atto": "c.p.p. 1988", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.p. 1988", "grado": 1}]
+  },
+  {
+    "domanda": "Se subisco un incidente stradale e ho perfettamente ragione, il Codice delle Assicurazioni Private mi consente di chiedere i danni direttamente alla mia compagnia invece che a quella dell'altro guidatore?",
+    "rilevanti": [{"numero_puro": "149",  "codice_breve_atto": "cod. ass.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. ass.", "grado": 1}]
+  },
+  {
+    "domanda": "Se facendo dei lavori di scavo nel mio giardino trovo per caso un vaso di epoca romana, a chi appartiene per legge secondo il Codice dei Beni Culturali?",
+    "rilevanti": [{"numero_puro": "91",   "codice_breve_atto": "cod. beni cult.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. beni cult.", "grado": 1}]
+  },
+  {
+    "domanda": "Se il resort che ho prenotato è fatiscente rispetto alle foto e mi rovina le ferie, posso chiedere un risarcimento specifico basandomi sul Codice del Turismo?",
+    "rilevanti": [{"numero_puro": null,   "codice_breve_atto": "cod. turismo", "grado": 3}]
+  },
+  {
+    "domanda": "Cosa rischio in base al Codice dell'Ambiente se abbandono dei sacchi di spazzatura o vecchi mobili ai bordi di una strada di campagna?",
+    "rilevanti": [{"numero_puro": "255",  "codice_breve_atto": "cod. amb.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. amb.", "grado": 1}]
+  },
+  {
+    "domanda": "Quanto tempo dura la validità dell'informazione rilasciata dal prefetto alle aziende pubbliche per certificare l'assenza di infiltrazioni mafiose secondo il Codice Antimafia?",
+    "rilevanti": [{"numero_puro": "86",   "codice_breve_atto": "cod. antimafia", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. antimafia", "grado": 1}]
+  },
+  {
+    "domanda": "In che modo il Codice delle Pari Opportunità definisce esattamente cosa si intende per discriminazione diretta sul luogo di lavoro tra uomo e donna?",
+    "rilevanti": [{"numero_puro": "25",   "codice_breve_atto": "cod. pari opp.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. pari opp.", "grado": 1}]
+  },
+  {
+    "domanda": "Nel Codice della Crisi d'Impresa, chi sono i soggetti che hanno il diritto di presentare al tribunale la domanda per far aprire la liquidazione giudiziale di una società piena di debiti?",
+    "rilevanti": [{"numero_puro": "37",   "codice_breve_atto": "cod. crisi imp.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. crisi imp.", "grado": 1}]
+  },
+  {
+    "domanda": "Che validità legale ha un contratto informatico se lo firmo utilizzando una firma digitale qualificata, come stabilito dal Codice dell'Amministrazione Digitale?",
+    "rilevanti": [{"numero_puro": "21",   "codice_breve_atto": "c.a.d.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.a.d.", "grado": 1}]
+  },
+  {
+    "domanda": "Quali sono i requisiti di base che un'invenzione deve avere per poter ottenere un brevetto secondo il Codice della Proprietà Industriale?",
+    "rilevanti": [{"numero_puro": "45",   "codice_breve_atto": "c.p.i.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.i.", "grado": 1}]
+  },
+  {
+    "domanda": "Quali tipi di associazioni o organizzazioni sono ufficialmente considerate Enti del Terzo Settore secondo la definizione dettata dal Codice del Terzo Settore?",
+    "rilevanti": [{"numero_puro": "4",    "codice_breve_atto": "cod. terzo set.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. terzo set.", "grado": 1}]
+  },
+  {
+    "domanda": "Se l'operatore telefonico deve far passare i cavi della fibra ottica sulla facciata del mio condominio, può farlo senza il mio permesso in base al Codice delle Comunicazioni Elettroniche?",
+    "rilevanti": [{"numero_puro": "91",   "codice_breve_atto": "c.c.e.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.c.e.", "grado": 1}]
+  },
+  {
+    "domanda": "Se la mia nave intercetta un'altra imbarcazione che sta affondando o persone in pericolo in mare, il Codice della Navigazione mi obbliga ad andare ad aiutarli?",
+    "rilevanti": [{"numero_puro": "490",  "codice_breve_atto": "cod. nav.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. nav.", "grado": 1}]
+  },
+  {
+    "domanda": "Cosa rischia un militare che insulta apertamente un suo superiore gerarchico durante il servizio, secondo le regole del Codice Penale Militare di Pace?",
+    "rilevanti": [{"numero_puro": null,   "codice_breve_atto": "c.p.m.p.", "grado": 3}]
+  },
+  {
+    "domanda": "Quanti giorni di tempo ho dalla notifica per presentare un ricorso ufficiale contro una cartella esattoriale ingiusta secondo le Disposizioni sul Processo Tributario?",
+    "rilevanti": [{"numero_puro": "21",   "codice_breve_atto": "d.lgs. 546/92", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "d.lgs. 546/92", "grado": 1}]
+  },
+  {
+    "domanda": "Entro quale termine massimo di giorni devo fare ricorso al TAR per far annullare una delibera del mio Comune in base al Codice del Processo Amministrativo?",
+    "rilevanti": [{"numero_puro": null,   "codice_breve_atto": "c.p.a.", "grado": 3}]
+  },
+  {
+    "domanda": "Chi è l'organo politico che ha il potere ufficiale di dichiarare lo stato di emergenza per una calamità naturale secondo il Codice della Protezione Civile?",
+    "rilevanti": [{"numero_puro": "24",   "codice_breve_atto": "cod. prot. civ.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. prot. civ.", "grado": 1}]
+  },
+  {
+    "domanda": "Quali sono esattamente le materie e le controversie su cui ha il potere di giudicare la Corte dei conti in base a quanto scritto nel Codice di Giustizia Contabile?",
+    "rilevanti": [{"numero_puro": null,   "codice_breve_atto": "c.g.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Fino a quale importo massimo in euro il sindaco di un Comune può dare un incarico di lavori a una ditta direttamente, senza fare una gara d'appalto aperta, secondo il Codice dei Contratti Pubblici 2023?",
+    "rilevanti": [{"numero_puro": "50",   "codice_breve_atto": "cod. contr. pubbl. 2023", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. contr. pubbl. 2023", "grado": 1}]
+  },
+  {
+    "domanda": "Se occupo, curo e coltivo un terreno abbandonato di un'altra persona per tanti anni senza che nessuno mi dica nulla, dopo quanto tempo ne divento automaticamente il proprietario per il Codice Civile?",
+    "rilevanti": [{"numero_puro": "1158", "codice_breve_atto": "c.c.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.c.", "grado": 1}]
+  },
+  {
+    "domanda": "Se una persona per strada mi strappa via la borsa dalle mani usandomi violenza, il Codice Penale lo classifica come un semplice furto o come una rapina?",
+    "rilevanti": [{"numero_puro": "628",  "codice_breve_atto": "c.p.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.", "grado": 1}]
+  },
+  {
+    "domanda": "Se compro un frigorifero nuovo in negozio e conservo lo scontrino, per quanti anni ho diritto alla garanzia del venditore se l'elettrodomestico si rompe, come stabilito dal Codice del Consumo?",
+    "rilevanti": [{"numero_puro": "133",  "codice_breve_atto": "cod. consumo", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. consumo", "grado": 1}]
+  },
+  {
+    "domanda": "Il Codice della Strada mi autorizza a usare lo smartphone mentre sto guidando la macchina se utilizzo la funzione del vivavoce?",
+    "rilevanti": [{"numero_puro": "173",  "codice_breve_atto": "c.d.s.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.d.s.", "grado": 1}]
+  },
+  {
+    "domanda": "Oltre quale limite di potenza del motore della barca diventa assolutamente obbligatorio avere preso la patente nautica secondo le regole del Codice della Nautica da Diporto?",
+    "rilevanti": [{"numero_puro": "39",   "codice_breve_atto": "cod. nautica", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. nautica", "grado": 1}]
+  }
+]

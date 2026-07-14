@@ -1,0 +1,167 @@
+[
+  {
+    "tipo": "con_numero",
+    "domanda": "Come è cambiato l'articolo 34 del Codice di Procedura Penale nel corso degli anni?",
+    "rilevanti": [{"numero_puro": "34", "codice_breve_atto": "c.p.p. 1988", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Quali modifiche ha subito l'articolo 116 del Codice della Strada dalla sua entrata in vigore?",
+    "rilevanti": [{"numero_puro": "116", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Come si è evoluta nel tempo la disciplina dell'articolo 275 del Codice di Procedura Penale sulle misure cautelari?",
+    "rilevanti": [{"numero_puro": "275", "codice_breve_atto": "c.p.p. 1988", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Quante versioni ha avuto l'articolo 380 del Codice di Procedura Penale sull'arresto in flagranza e cosa è cambiato?",
+    "rilevanti": [{"numero_puro": "380", "codice_breve_atto": "c.p.p. 1988", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Come è stata modificata nel tempo la norma sugli interessi legali all'articolo 1284 del Codice Civile?",
+    "rilevanti": [{"numero_puro": "1284", "codice_breve_atto": "c.c.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Ripercorri la storia delle modifiche all'articolo 173 del Codice della Strada sull'uso del telefono alla guida.",
+    "rilevanti": [{"numero_puro": "173", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Come è cambiato nel corso degli anni l'articolo 126 del Codice della Strada sulla patente a punti?",
+    "rilevanti": [{"numero_puro": "126", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Mostrami l'evoluzione storica dell'articolo 51 del Codice di Procedura Penale.",
+    "rilevanti": [{"numero_puro": "51", "codice_breve_atto": "c.p.p. 1988", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Come è evoluta la norma sull'assicurazione obbligatoria all'articolo 139 del Codice delle Assicurazioni Private?",
+    "rilevanti": [{"numero_puro": "139", "codice_breve_atto": "cod. ass.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Quali sono le versioni storiche dell'articolo 158 del Codice della Strada sulla sosta e come è cambiata la disciplina?",
+    "rilevanti": [{"numero_puro": "158", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Come si è trasformata nel tempo la disciplina dell'articolo 8 del Codice dell'Ambiente?",
+    "rilevanti": [{"numero_puro": "8", "codice_breve_atto": "cod. amb.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Ripercorri le modifiche subite dall'articolo 93 del Codice della Strada sulla carta di circolazione.",
+    "rilevanti": [{"numero_puro": "93", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Come è cambiata nel tempo la disciplina dell'articolo 180 del Codice della Strada sui documenti di guida?",
+    "rilevanti": [{"numero_puro": "180", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Mostrami la storia delle versioni dell'articolo 117 del Codice della Strada sulla guida accompagnata.",
+    "rilevanti": [{"numero_puro": "117", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "con_numero",
+    "domanda": "Come è evoluta nel tempo la norma dell'articolo 172 del Codice della Strada sull'uso delle cinture di sicurezza?",
+    "rilevanti": [{"numero_puro": "172", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come è cambiata nel corso degli anni la disciplina della patente di guida per i neopatentati in Italia?",
+    "rilevanti": [{"numero_puro": "117", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,   "codice_breve_atto": "c.d.s.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come si è evoluta nel tempo la normativa italiana sulle misure cautelari e la custodia cautelare?",
+    "rilevanti": [{"numero_puro": "275", "codice_breve_atto": "c.p.p. 1988", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.p. 1988", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come è cambiata la disciplina degli interessi legali in Italia negli ultimi decenni?",
+    "rilevanti": [{"numero_puro": "1284", "codice_breve_atto": "c.c.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,    "codice_breve_atto": "c.c.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come si è evoluta nel corso degli anni la normativa italiana sul risarcimento diretto nell'assicurazione auto?",
+    "rilevanti": [{"numero_puro": "149", "codice_breve_atto": "cod. ass.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. ass.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come è cambiata nel tempo la regolamentazione dell'uso del telefono cellulare alla guida in Italia?",
+    "rilevanti": [{"numero_puro": "173", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,   "codice_breve_atto": "c.d.s.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come si è evoluta nel corso degli anni la disciplina dell'arresto in flagranza di reato?",
+    "rilevanti": [{"numero_puro": "380", "codice_breve_atto": "c.p.p. 1988", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.p. 1988", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come è cambiata negli anni la normativa ambientale italiana sull'abbandono dei rifiuti?",
+    "rilevanti": [{"numero_puro": "255", "codice_breve_atto": "cod. amb.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. amb.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come si è evoluta nel corso del tempo la disciplina della sosta e del divieto di sosta in Italia?",
+    "rilevanti": [{"numero_puro": "158", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,   "codice_breve_atto": "c.d.s.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come è cambiata la normativa sulla competenza e le funzioni della procura antimafia nel tempo?",
+    "rilevanti": [{"numero_puro": "51", "codice_breve_atto": "c.p.p. 1988", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,  "codice_breve_atto": "c.p.p. 1988", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come si è evoluta nel tempo la disciplina delle cinture di sicurezza in auto in Italia?",
+    "rilevanti": [{"numero_puro": "172", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,   "codice_breve_atto": "c.d.s.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come è cambiata nel corso degli anni la normativa sulla revisione obbligatoria dei veicoli?",
+    "rilevanti": [{"numero_puro": "80", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,  "codice_breve_atto": "c.d.s.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come si è trasformata nel tempo la disciplina sulla carta di circolazione dei veicoli in Italia?",
+    "rilevanti": [{"numero_puro": "93", "codice_breve_atto": "c.d.s.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,  "codice_breve_atto": "c.d.s.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come è evoluta nel corso degli anni la normativa italiana sulla responsabilità ambientale per i gestori degli impianti?",
+    "rilevanti": [{"numero_puro": "8", "codice_breve_atto": "cod. amb.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,  "codice_breve_atto": "cod. amb.", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come è cambiata nel corso del tempo la disciplina delle incompatibilità del giudice nel processo penale?",
+    "rilevanti": [{"numero_puro": "34", "codice_breve_atto": "c.p.p. 1988", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,  "codice_breve_atto": "c.p.p. 1988", "grado": 1, "min_versioni": 1}]
+  },
+  {
+    "tipo": "tematica",
+    "domanda": "Come è cambiata nel tempo la normativa sul danno biologico nelle assicurazioni per le lesioni lievi?",
+    "rilevanti": [{"numero_puro": "139", "codice_breve_atto": "cod. ass.", "grado": 3, "min_versioni": 2},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. ass.", "grado": 1, "min_versioni": 1}]
+  }
+]

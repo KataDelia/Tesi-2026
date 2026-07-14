@@ -1,0 +1,188 @@
+[
+  {
+    "tipo": "A",
+    "domanda": "Come era disciplinata la patente di guida nell'articolo 116 del Codice della Strada nel 1993?",
+    "rilevanti": [{"numero_puro": "116", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19920430, "valido_al_raw": 19930930}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Cosa prevedeva l'articolo 117 del Codice della Strada nel 1994?",
+    "rilevanti": [{"numero_puro": "117", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19931001, "valido_al_raw": 19950123}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Come era regolata la targa dei veicoli dall'articolo 100 del Codice della Strada nel 1995?",
+    "rilevanti": [{"numero_puro": "100", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19950124, "valido_al_raw": 19970111}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Qual era la disciplina dell'articolo 126 del Codice della Strada nel 1996?",
+    "rilevanti": [{"numero_puro": "126", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19960113, "valido_al_raw": 19970111}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Come disciplinava l'articolo 158 del Codice della Strada la sosta nel 1998?",
+    "rilevanti": [{"numero_puro": "158", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19970112, "valido_al_raw": 19990111}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Cosa stabiliva l'articolo 173 del Codice della Strada sull'uso del telefono alla guida nel 2000?",
+    "rilevanti": [{"numero_puro": "173", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19990112, "valido_al_raw": 20010113}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Come era regolata la revisione dei veicoli dall'articolo 80 del Codice della Strada nel 1997?",
+    "rilevanti": [{"numero_puro": "80", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": null, "valido_al_raw": null}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Qual era il contenuto dell'articolo 34 del Codice di Procedura Penale nel 1991?",
+    "rilevanti": [{"numero_puro": "34", "codice_breve_atto": "c.p.p. 1988", "grado": 3,
+                   "valido_dal_raw": 19901101, "valido_al_raw": 19911120}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Come disciplinava l'articolo 275 del Codice di Procedura Penale le misure cautelari nel 1992?",
+    "rilevanti": [{"numero_puro": "275", "codice_breve_atto": "c.p.p. 1988", "grado": 3,
+                   "valido_dal_raw": 19911110, "valido_al_raw": 19930714}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Cosa prevedeva l'articolo 380 del Codice di Procedura Penale sull'arresto in flagranza nel 1994?",
+    "rilevanti": [{"numero_puro": "380", "codice_breve_atto": "c.p.p. 1988", "grado": 3,
+                   "valido_dal_raw": 19930225, "valido_al_raw": 19980810}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Come era disciplinato l'articolo 51 del Codice di Procedura Penale nel 1999?",
+    "rilevanti": [{"numero_puro": "51", "codice_breve_atto": "c.p.p. 1988", "grado": 3,
+                   "valido_dal_raw": 19980704, "valido_al_raw": 20010418}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Qual era la disciplina dell'articolo 1284 del Codice Civile sugli interessi legali nel 1995?",
+    "rilevanti": [{"numero_puro": "1284", "codice_breve_atto": "c.c.", "grado": 3,
+                   "valido_dal_raw": 19901216, "valido_al_raw": 19961231}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Come era regolato l'articolo 1284 del Codice Civile sugli interessi nel 2001?",
+    "rilevanti": [{"numero_puro": "1284", "codice_breve_atto": "c.c.", "grado": 3,
+                   "valido_dal_raw": 20001230, "valido_al_raw": 20011228}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Cosa stabiliva l'articolo 8 del Codice dell'Ambiente nel 2009?",
+    "rilevanti": [{"numero_puro": "8", "codice_breve_atto": "cod. amb.", "grado": 3,
+                   "valido_dal_raw": 20090301, "valido_al_raw": 20100825}]
+  },
+  {
+    "tipo": "A",
+    "domanda": "Come era disciplinato l'articolo 139 del Codice delle Assicurazioni Private nel 2007?",
+    "rilevanti": [{"numero_puro": "139", "codice_breve_atto": "cod. ass.", "grado": 3,
+                   "valido_dal_raw": 20060621, "valido_al_raw": 20070704}]
+  },
+  {
+    "tipo": "B",
+    "domanda": "Cosa prevedeva l'articolo 116 del Codice della Strada sulla patente nel 1993?",
+    "rilevanti": [{"numero_puro": "116", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19920430, "valido_al_raw": 19930930}]
+  },
+  {
+    "tipo": "B",
+    "domanda": "Come era disciplinato l'articolo 126 del Codice della Strada prima della riforma del 1996?",
+    "rilevanti": [{"numero_puro": "126", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19950411, "valido_al_raw": 19960112}]
+  },
+  {
+    "tipo": "B",
+    "domanda": "Come regolava l'articolo 180 del Codice della Strada i documenti di guida prima del 2001?",
+    "rilevanti": [{"numero_puro": "180", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19990112, "valido_al_raw": 20010113}]
+  },
+  {
+    "tipo": "B",
+    "domanda": "Cosa stabiliva l'articolo 34 del Codice di Procedura Penale prima della modifica del 1992?",
+    "rilevanti": [{"numero_puro": "34", "codice_breve_atto": "c.p.p. 1988", "grado": 3,
+                   "valido_dal_raw": 19901101, "valido_al_raw": 19911120}]
+  },
+  {
+    "tipo": "B",
+    "domanda": "Come disciplinava l'articolo 380 del Codice di Procedura Penale l'arresto prima del 1993?",
+    "rilevanti": [{"numero_puro": "380", "codice_breve_atto": "c.p.p. 1988", "grado": 3,
+                   "valido_dal_raw": 19920808, "valido_al_raw": 19930224}]
+  },
+  {
+    "tipo": "B",
+    "domanda": "Qual era la disciplina dell'articolo 1284 del Codice Civile sugli interessi prima del 1997?",
+    "rilevanti": [{"numero_puro": "1284", "codice_breve_atto": "c.c.", "grado": 3,
+                   "valido_dal_raw": 19421016, "valido_al_raw": 19901215}]
+  },
+  {
+    "tipo": "C",
+    "domanda": "Qual era il testo originario dell'articolo 117 del Codice della Strada al momento della sua entrata in vigore?",
+    "rilevanti": [{"numero_puro": "117", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": 19920430, "valido_al_raw": 19930208}]
+  },
+  {
+    "tipo": "C",
+    "domanda": "Qual era il testo originario dell'articolo 380 del Codice di Procedura Penale al momento della sua entrata in vigore?",
+    "rilevanti": [{"numero_puro": "380", "codice_breve_atto": "c.p.p. 1988", "grado": 3,
+                   "valido_dal_raw": 19880922, "valido_al_raw": 19910512}]
+  },
+  {
+    "tipo": "C",
+    "domanda": "Qual era il testo originale dell'articolo 34 del Codice di Procedura Penale del 1988?",
+    "rilevanti": [{"numero_puro": "34", "codice_breve_atto": "c.p.p. 1988", "grado": 3,
+                   "valido_dal_raw": 19880922, "valido_al_raw": 19901031}]
+  },
+  {
+    "tipo": "C",
+    "domanda": "Qual era il testo originario dell'articolo 1284 del Codice Civile sugli interessi legali al momento della sua entrata in vigore?",
+    "rilevanti": [{"numero_puro": "1284", "codice_breve_atto": "c.c.", "grado": 3,
+                   "valido_dal_raw": 19420316, "valido_al_raw": 19901215}]
+  },
+  {
+    "tipo": "C",
+    "domanda": "Qual era il testo originario dell'articolo 8 del Codice dell'Ambiente al momento della sua approvazione nel 2006?",
+    "rilevanti": [{"numero_puro": "8", "codice_breve_atto": "cod. amb.", "grado": 3,
+                   "valido_dal_raw": 20060403, "valido_al_raw": 20080212}]
+  },
+  {
+    "tipo": "C",
+    "domanda": "Qual era il testo originario dell'articolo 139 del Codice delle Assicurazioni Private al momento della sua entrata in vigore?",
+    "rilevanti": [{"numero_puro": "139", "codice_breve_atto": "cod. ass.", "grado": 3,
+                   "valido_dal_raw": 20050907, "valido_al_raw": 20060620}]
+  },
+  {
+    "tipo": "D",
+    "domanda": "Qual è la versione attualmente vigente dell'articolo 116 del Codice della Strada sulla patente di guida?",
+    "rilevanti": [{"numero_puro": "116", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": null, "valido_al_raw": null}]
+  },
+  {
+    "tipo": "D",
+    "domanda": "Qual è il testo vigente oggi dell'articolo 173 del Codice della Strada sull'uso del telefono alla guida?",
+    "rilevanti": [{"numero_puro": "173", "codice_breve_atto": "c.d.s.", "grado": 3,
+                   "valido_dal_raw": null, "valido_al_raw": null}]
+  },
+  {
+    "tipo": "D",
+    "domanda": "Qual è attualmente la disciplina vigente dell'articolo 1284 del Codice Civile sugli interessi legali?",
+    "rilevanti": [{"numero_puro": "1284", "codice_breve_atto": "c.c.", "grado": 3,
+                   "valido_dal_raw": null, "valido_al_raw": null}]
+  },
+  {
+    "tipo": "D",
+    "domanda": "Qual è il testo vigente oggi dell'articolo 139 del Codice delle Assicurazioni Private sul danno biologico?",
+    "rilevanti": [{"numero_puro": "139", "codice_breve_atto": "cod. ass.", "grado": 3,
+                   "valido_dal_raw": null, "valido_al_raw": null}]
+  }
+]

@@ -1,0 +1,148 @@
+[
+  {
+    "domanda": "Sto organizzando il mio matrimonio in comune a Roma. Quanti testimoni devo portare il giorno della cerimonia affinché sia valida?",
+    "rilevanti": [{"numero_puro": "107", "codice_breve_atto": "c.c.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "c.c.", "grado": 1}]
+  },
+  {
+    "domanda": "Quando organizzo dei giochi all'aperto per un gruppo di ragazzini delle medie, se uno di loro si fa male correndo, di chi è la colpa legale?",
+    "rilevanti": [{"numero_puro": "2048", "codice_breve_atto": "c.c.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.c.", "grado": 1}]
+  },
+  {
+    "domanda": "Ho creato un design per un nuovo tipo di incastro per lavoretti in stampa 3D. Quali caratteristiche esatte deve avere la mia idea per poter essere brevettata?",
+    "rilevanti": [{"numero_puro": "45", "codice_breve_atto": "c.p.i.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "c.p.i.", "grado": 1}]
+  },
+  {
+    "domanda": "Voglio girare un cortometraggio amatoriale con i miei amici piazzando la telecamera proprio davanti a un monumento storico. Devo pagare o chiedere un permesso per inquadrarlo?",
+    "rilevanti": [{"numero_puro": "108", "codice_breve_atto": "cod. beni cult.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. beni cult.", "grado": 1}]
+  },
+  {
+    "domanda": "L'altra sera guidando ho preso una multa per aver superato i limiti di velocità. Oltre ai soldi, quanti punti mi tolgono di preciso dalla patente?",
+    "rilevanti": [{"numero_puro": "142", "codice_breve_atto": "c.d.s.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.d.s.", "grado": 1}]
+  },
+  {
+    "domanda": "Ho comprato online dei pezzi di ricambio per aggiustare il mio portatile ma mi sono accorta che non mi servono più. Entro quanti giorni posso rimandarli indietro e avere i soldi indietro senza dare spiegazioni?",
+    "rilevanti": [{"numero_puro": "52", "codice_breve_atto": "cod. consumo", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "cod. consumo", "grado": 1}]
+  },
+  {
+    "domanda": "Dopo aver dato i miei dati a un sito di recensioni di film per registrarmi, questi continuano a mandarmi pubblicità di altri servizi. Possono farlo anche se non ho mai spuntato la casellina apposita?",
+    "rilevanti": [{"numero_puro": "130", "codice_breve_atto": "cod. privacy", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. privacy", "grado": 1}]
+  },
+  {
+    "domanda": "Se prenoto una location per il viaggio di nozze e il posto fa schifo rispetto alle foto che mi avevano mostrato in agenzia, ho diritto a essere rimborsata per il disagio morale?",
+    "rilevanti": [{"numero_puro": null, "codice_breve_atto": "cod. turismo", "grado": 3}]
+  },
+  {
+    "domanda": "Se devo mandare un aggiornamento di un progetto importante al mio professore e firmo il documento digitale con la mia firma elettronica qualificata, vale legalmente come un foglio di carta firmato a penna?",
+    "rilevanti": [{"numero_puro": "21", "codice_breve_atto": "c.a.d.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "c.a.d.", "grado": 1}]
+  },
+  {
+    "domanda": "Un tizio mi ha scritto una recensione falsissima per screditarmi pubblicamente su internet inventandosi cose mai successe. Che reato sta compiendo?",
+    "rilevanti": [{"numero_puro": "595", "codice_breve_atto": "c.p.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.", "grado": 1}]
+  },
+  {
+    "domanda": "Se devo riavere indietro 2000 euro che ho prestato a un conoscente e questo non me li ridà, posso rivolgermi a un giudice di pace per fare prima invece di andare in tribunale?",
+    "rilevanti": [{"numero_puro": "7", "codice_breve_atto": "c.p.c.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "c.p.c.", "grado": 1}]
+  },
+  {
+    "domanda": "Mi hanno tamponato in macchina mentre ero ferma al semaforo e ho ragione al cento per cento. Posso chiamare direttamente la mia compagnia assicurativa per farmi risarcire i danni?",
+    "rilevanti": [{"numero_puro": "149", "codice_breve_atto": "cod. ass.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. ass.", "grado": 1}]
+  },
+  {
+    "domanda": "Se vedo qualcuno che scarica sacchi di spazzatura o scarti di lavorazione in mezzo a un prato isolato, a che tipo di sanzione va incontro?",
+    "rilevanti": [{"numero_puro": "255", "codice_breve_atto": "cod. amb.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. amb.", "grado": 1}]
+  },
+  {
+    "domanda": "Quelli che mettono la fibra per internet vogliono far passare i cavi sul muro esterno del mio palazzo per forza. Possono farlo anche se noi condomini non siamo d'accordo?",
+    "rilevanti": [{"numero_puro": "91", "codice_breve_atto": "c.c.e.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "c.c.e.", "grado": 1}]
+  },
+  {
+    "domanda": "Mi è arrivata da pagare una tassa che sono sicurissima di aver già saldato. Quanti giorni ho per fare formalmente ricorso da quando mi consegnano la lettera?",
+    "rilevanti": [{"numero_puro": "21", "codice_breve_atto": "d.lgs. 546/92", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "d.lgs. 546/92", "grado": 1}]
+  },
+  {
+    "domanda": "Se voglio affittare un piccolo gommone per andare al mare, qual è il limite massimo di potenza del motore per guidarlo senza dover aver preso prima la patente nautica?",
+    "rilevanti": [{"numero_puro": "39", "codice_breve_atto": "cod. nautica", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "cod. nautica", "grado": 1}]
+  },
+  {
+    "domanda": "Se ho preso in affitto una barca e vedo qualcuno in mare che chiede aiuto o sta palesemente per affondare, c'è una legge che mi obbliga ad andare a salvarli?",
+    "rilevanti": [{"numero_puro": "490", "codice_breve_atto": "cod. nav.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "cod. nav.", "grado": 1}]
+  },
+  {
+    "domanda": "Se mi chiamano in tribunale per testimoniare su qualcosa che ho visto, posso rifiutarmi di rispondere a una domanda specifica se ho paura che la mia risposta mi faccia finire sotto indagine?",
+    "rilevanti": [{"numero_puro": "198", "codice_breve_atto": "c.p.p. 1988", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.p. 1988", "grado": 1}]
+  },
+  {
+    "domanda": "Che tipo di associazioni, gruppi di volontariato o fondazioni possono registrarsi ufficialmente per essere considerate organizzazioni senza scopo di lucro appartenenti al terzo settore?",
+    "rilevanti": [{"numero_puro": "4", "codice_breve_atto": "cod. terzo set.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "cod. terzo set.", "grado": 1}]
+  },
+  {
+    "domanda": "Chi fa parte delle forze armate può iscriversi liberamente a un sindacato per far valere i propri diritti legati al posto di lavoro?",
+    "rilevanti": [{"numero_puro": "1475", "codice_breve_atto": "c.o.m.", "grado": 3},
+                  {"numero_puro": null,    "codice_breve_atto": "c.o.m.", "grado": 1}]
+  },
+  {
+    "domanda": "Quando un'impresa ottiene il documento ufficiale della prefettura che dimostra che non ha infiltrazioni della criminalità organizzata, per quanti mesi resta valido quel foglio?",
+    "rilevanti": [{"numero_puro": "86", "codice_breve_atto": "cod. antimafia", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "cod. antimafia", "grado": 1}]
+  },
+  {
+    "domanda": "Se una grossa società è strapiena di debiti e non riesce più a pagare nessuno, chi ha il diritto di andare dal giudice a chiedere che l'azienda venga definitivamente chiusa e liquidata?",
+    "rilevanti": [{"numero_puro": "37", "codice_breve_atto": "cod. crisi imp.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "cod. crisi imp.", "grado": 1}]
+  },
+  {
+    "domanda": "Quando succede un grosso disastro fuori dall'ordinario, tipo un grave terremoto o un'alluvione, chi è che ha il potere a Roma di dichiarare ufficialmente lo stato di emergenza per tutto il Paese?",
+    "rilevanti": [{"numero_puro": "24", "codice_breve_atto": "cod. prot. civ.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "cod. prot. civ.", "grado": 1}]
+  },
+  {
+    "domanda": "Cosa si intende esattamente per legge quando si dice che c'è stata una discriminazione palese e diretta tra uomini e donne sul posto di lavoro?",
+    "rilevanti": [{"numero_puro": "25", "codice_breve_atto": "cod. pari opp.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "cod. pari opp.", "grado": 1}]
+  },
+  {
+    "domanda": "Di che tipi di processi e materie si occupa di preciso il tribunale che controlla i conti e le spese dello Stato?",
+    "rilevanti": [{"numero_puro": null, "codice_breve_atto": "c.g.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Sotto a quale importo massimo in euro un Comune può dare un lavoro direttamente a una ditta senza dover per forza pubblicare un bando di gara aperto a tutti?",
+    "rilevanti": [{"numero_puro": "50", "codice_breve_atto": "cod. contr. pubbl. 2023", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "cod. contr. pubbl. 2023", "grado": 1}]
+  },
+  {
+    "domanda": "Cosa rischia un soldato che insulta o minaccia pesantemente un suo comandante in caserma durante il servizio normale?",
+    "rilevanti": [{"numero_puro": null, "codice_breve_atto": "c.p.m.p.", "grado": 3}]
+  },
+  {
+    "domanda": "In una situazione di conflitto dichiarato, se un militare si rifiuta categoricamente di obbedire a un ordine del suo comandante di fronte alle truppe nemiche, qual è la conseguenza di legge?",
+    "rilevanti": [{"numero_puro": "138", "codice_breve_atto": "c.p.m.g.", "grado": 3},
+                  {"numero_puro": null,   "codice_breve_atto": "c.p.m.g.", "grado": 1}]
+  },
+  {
+    "domanda": "Ho appena comprato un appartamento nuovo. Devo pagare io di tasca mia le vecchie spese del condominio che il tizio che me lo ha venduto si era dimenticato di saldare?",
+    "rilevanti": [{"numero_puro": null, "codice_breve_atto": "disp. att. c.c.", "grado": 3}]
+  },
+  {
+    "domanda": "Se mi stanno indagando per un presunto reato e voglio avere in mano una copia delle carte che mi riguardano direttamente dal tribunale, posso richiederle pagando le spese?",
+    "rilevanti": [{"numero_puro": "43", "codice_breve_atto": "norme att. c.p.p.", "grado": 3},
+                  {"numero_puro": null,  "codice_breve_atto": "norme att. c.p.p.", "grado": 1}]
+  }
+]
