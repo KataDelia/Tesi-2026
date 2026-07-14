@@ -199,4 +199,3 @@ global_archi_RIMANDA_A <- list()
 plan(sequential)
 
 message("\nContenitori globali inizializzati.")
-

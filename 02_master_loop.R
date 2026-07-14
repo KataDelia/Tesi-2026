@@ -64,16 +64,16 @@ for (j in seq_len(n_atti)) {
                   sum(timeline_df$stato_vigenza == "STORICO", na.rm = TRUE)))
   
   # Accumulatori
-  nodi_Partizioni_list  <- list()
-  nodi_Versione_list    <- list()
-  archi_VIGENTE_list    <- list()
-  archi_EVOLVE_IN_list  <- list()
-  archi_CITA_list       <- list()
-  archi_CITA_ATTO_list  <- list()
-  archi_RIMANDA_A_list  <- list()
-  archi_APPARTIENE_list <- list()
-  vigenti_visti         <- character(0)
-  partizioni_viste      <- new.env(hash = TRUE, parent = emptyenv())
+  nodi_Partizioni_list   <- list()
+  nodi_Versione_list     <- list()
+  archi_HA_VERSIONE_list <- list() 
+  archi_EVOLVE_IN_list   <- list()
+  archi_CITA_list        <- list()
+  archi_CITA_ATTO_list   <- list()
+  archi_RIMANDA_A_list   <- list()
+  archi_APPARTIENE_list  <- list()
+  archi_SOTTO_PARTIZIONE_list <- list() # Accumulatore per la gerarchia degli allegati
+  partizioni_viste       <- new.env(hash = TRUE, parent = emptyenv())
   
   # Loop file XML
   for (i in seq_len(nrow(timeline_df))) {
@@ -130,7 +130,10 @@ for (j in seq_len(n_atti)) {
       if (isTRUE(stringr::str_detect(titolo_nodo, RX_NOTA_TITOLO)) ||
           isTRUE(stringr::str_detect(testo_incipit, RX_NOTA_TITOLO))) next
       
-      # Identificazione
+      # Identificazione e gerarchia
+      is_sotto_allegato <- FALSE
+      parent_allegato_id <- NA_character_
+      
       if (e_allegato) {
         all_meta      <- extract_allegato_meta(xml2::xml_parent(nodo_xml))
         doc_name_raw  <- xml2::xml_attr(nodo_xml, "name") %||%
@@ -143,6 +146,14 @@ for (j in seq_len(n_atti)) {
         tipo_partizione   <- "allegato"
         tipo_label        <- "Norma;Allegato"
         metodo_id         <- "allegato"
+        
+        # Rilevamento sotto-strutture: Se l'ID generato sembra indicare un sotto-elemento
+        if (grepl("_(art|art\\.|preambolo|par|sez|comma)_", id_pulito)) {
+          is_sotto_allegato <- TRUE
+          parent_allegato_id <- paste0(atto_urn, "#", sub("_(art|art\\.|preambolo|par|sez|comma)_?[0-9a-zA-Z\\.\\-_]+$", "", id_pulito))
+          tipo_partizione <- "articolo"
+          tipo_label      <- "Norma;Articolo"
+        }
         
       } else if (identical(xml2::xml_name(nodo_xml), "paragraph") &&
                  identical(xml2::xml_name(xml2::xml_parent(nodo_xml)), "mainBody")) {
@@ -178,7 +189,50 @@ for (j in seq_len(n_atti)) {
         testo_completo
       }
       
+      # Creazione arco gerarchico al volo e nodo padre (se mancante)
+      if (is_sotto_allegato) {
+        archi_SOTTO_PARTIZIONE_list[[length(archi_SOTTO_PARTIZIONE_list) + 1]] <- list(
+          `:START_ID(Partizione)` = articolo_global_id,
+          `:END_ID(Partizione)`   = parent_allegato_id
+        )
+        
+        if (!exists(parent_allegato_id, envir = partizioni_viste, inherits = FALSE)) {
+          assign(parent_allegato_id, TRUE, envir = partizioni_viste)
+          
+          numero_padre <- stringr::str_extract(parent_allegato_id, "allegato_[a-z0-9\\.]+")
+          numero_padre <- stringr::str_replace(numero_padre, "allegato_", "Allegato ")
+          numero_padre <- stringr::str_to_upper(numero_padre)
+          
+          nodi_Partizioni_list[[length(nodi_Partizioni_list) + 1]] <- list(
+            `partizione_id:ID(Partizione)` = parent_allegato_id,
+            numero                         = numero_padre,
+            titolo_atto                    = atto_corrente$titolo_rubrica,
+            atto_appartenenza              = atto_urn,
+            nome_comune_atto               = atto_corrente$nome_comune  %||% NA_character_,
+            codice_breve_atto              = atto_corrente$codice_breve %||% NA_character_,
+            tipo_partizione                = "allegato",
+            metodo_identificazione         = "generato",
+            parte_num                      = NA_character_,
+            parte_titolo                   = NA_character_,
+            titolo_num                     = NA_character_,
+            titolo_titolo                  = NA_character_,
+            capo_num                       = NA_character_,
+            capo_titolo                    = NA_character_,
+            sezione_num                    = NA_character_,
+            sezione_titolo                 = NA_character_,
+            `:LABEL`                       = "Norma;Allegato"
+          )
+          
+          archi_APPARTIENE_list[[length(archi_APPARTIENE_list) + 1]] <- list(
+            `:START_ID(Partizione)` = parent_allegato_id,
+            `:END_ID(Legge)`        = atto_urn
+          )
+        }
+      }
+      
       # Nodo Partizione
+      gerarchia_nodo <- extract_gerarchia(nodo_xml)
+      
       if (!exists(articolo_global_id, envir = partizioni_viste, inherits = FALSE)) {
         assign(articolo_global_id, TRUE, envir = partizioni_viste)
         
@@ -191,6 +245,14 @@ for (j in seq_len(n_atti)) {
           codice_breve_atto              = atto_corrente$codice_breve %||% NA_character_,
           tipo_partizione                = tipo_partizione,
           metodo_identificazione         = metodo_id,
+          parte_num                      = gerarchia_nodo$parte_num,
+          parte_titolo                   = gerarchia_nodo$parte_titolo,
+          titolo_num                     = gerarchia_nodo$titolo_num,
+          titolo_titolo                  = gerarchia_nodo$titolo_titolo,
+          capo_num                       = gerarchia_nodo$capo_num,
+          capo_titolo                    = gerarchia_nodo$capo_titolo,
+          sezione_num                    = gerarchia_nodo$sezione_num,
+          sezione_titolo                 = gerarchia_nodo$sezione_titolo,
           `:LABEL`                       = tipo_label
         )
         
@@ -202,33 +264,30 @@ for (j in seq_len(n_atti)) {
       
       # Nodo Versione
       nodi_Versione_list[[length(nodi_Versione_list) + 1]] <- list(
-        versione_id       = versione_global_id,
-        testo_puro        = testo_per_rag,
-        numero            = numero_formattato,
-        titolo_atto       = atto_corrente$titolo_rubrica,
-        nome_comune_atto  = atto_corrente$nome_comune  %||% NA_character_,
-        codice_breve_atto = atto_corrente$codice_breve %||% NA_character_,
-        atto_appartenenza = atto_urn,
-        valido_dal        = as.integer(format(row_tl$valido_dal, "%Y%m%d")),
-        valido_al         = as.integer(format(row_tl$valido_al,  "%Y%m%d")),
-        stato_temporale   = row_tl$stato_vigenza,
-        num_versione      = as.integer(row_tl$versione_id),
-        stato_norma       = stato_norma,
-        tipo_modifica     = tipo_modifica,
-        `:LABEL`          = "Versione"
+        `versione_id:ID(Versione)` = versione_global_id,
+        testo_puro                 = testo_per_rag,
+        numero                     = numero_formattato,
+        titolo_atto                = atto_corrente$titolo_rubrica,
+        nome_comune_atto           = atto_corrente$nome_comune  %||% NA_character_,
+        codice_breve_atto          = atto_corrente$codice_breve %||% NA_character_,
+        atto_appartenenza          = atto_urn,
+        valido_dal                 = as.integer(format(row_tl$valido_dal, "%Y%m%d")),
+        valido_al                  = as.integer(format(row_tl$valido_al,  "%Y%m%d")),
+        stato_temporale            = row_tl$stato_vigenza,
+        num_versione               = as.integer(row_tl$versione_id),
+        stato_norma                = stato_norma,
+        tipo_modifica              = tipo_modifica,
+        `:LABEL`                   = "Versione"
       )
       
-      # Arco VIGENTE
-      if (row_tl$stato_vigenza == "VIGENTE" &&
-          !articolo_global_id %in% vigenti_visti) {
-        vigenti_visti <- c(vigenti_visti, articolo_global_id)
-        archi_VIGENTE_list[[length(archi_VIGENTE_list) + 1]] <- list(
-          `:START_ID(Partizione)` = articolo_global_id,
-          `:END_ID(Versione)`     = versione_global_id,
-          valido_dal              = as.integer(format(row_tl$valido_dal, "%Y%m%d")),
-          valido_al               = as.integer(format(row_tl$valido_al,  "%Y%m%d"))
-        )
-      }
+      # Arco HA_VERSIONE
+      archi_HA_VERSIONE_list[[length(archi_HA_VERSIONE_list) + 1]] <- list(
+        `:START_ID(Partizione)` = articolo_global_id,
+        `:END_ID(Versione)`     = versione_global_id,
+        valido_dal              = as.integer(format(row_tl$valido_dal, "%Y%m%d")),
+        valido_al               = as.integer(format(row_tl$valido_al,  "%Y%m%d")),
+        stato_vigenza           = row_tl$stato_vigenza
+      )
       
       # Arco EVOLVE_IN
       if (!is.na(row_tl$id_versione_successiva)) {
@@ -291,43 +350,46 @@ for (j in seq_len(n_atti)) {
         }
       }
       
-    }
-  }
+    } 
+  } 
   
-  # Scrittura CSV parziali
+  # Scrittura CSV parziali e pulizia RAM
   scrivi_partial(nodi_Partizioni_list,  "nodi_Partizioni",  j)
   scrivi_partial(nodi_Versione_list,    "nodi_Versione",    j)
-  scrivi_partial(archi_VIGENTE_list,    "archi_VIGENTE",    j)
+  scrivi_partial(archi_HA_VERSIONE_list,"archi_HA_VERSIONE",j)
   scrivi_partial(archi_EVOLVE_IN_list,  "archi_EVOLVE_IN",  j)
   scrivi_partial(archi_CITA_list,       "archi_CITA",       j)
   scrivi_partial(archi_CITA_ATTO_list,  "archi_CITA_ATTO",  j)
   scrivi_partial(archi_RIMANDA_A_list,  "archi_RIMANDA_A",  j)
   scrivi_partial(archi_APPARTIENE_list, "archi_APPARTIENE", j)
+  scrivi_partial(archi_SOTTO_PARTIZIONE_list, "archi_SOTTO_PARTIZIONE", j)
   
   n_log <- list(
     partizioni = length(nodi_Partizioni_list),
     versioni   = length(nodi_Versione_list),
-    vigente    = length(archi_VIGENTE_list),
+    ha_versione= length(archi_HA_VERSIONE_list),
     evolve     = length(archi_EVOLVE_IN_list),
     cita       = length(archi_CITA_list),
     cita_atto  = length(archi_CITA_ATTO_list),
     rimanda    = length(archi_RIMANDA_A_list),
-    appartiene = length(archi_APPARTIENE_list)
+    appartiene = length(archi_APPARTIENE_list),
+    sotto_part = length(archi_SOTTO_PARTIZIONE_list)
   )
   
   rm(nodi_Partizioni_list, nodi_Versione_list,
-     archi_VIGENTE_list, archi_EVOLVE_IN_list,
+     archi_HA_VERSIONE_list, archi_EVOLVE_IN_list,
      archi_CITA_list, archi_CITA_ATTO_list,
      archi_RIMANDA_A_list, archi_APPARTIENE_list,
-     partizioni_viste, vigenti_visti)
+     archi_SOTTO_PARTIZIONE_list, partizioni_viste)
   gc(verbose = FALSE)
   
   message(sprintf(
-    "<<< %d part. | %d vers. | %d VIGENTE | %d EVOLVE | %d CITA | %d CITA_ATTO | %d RIMANDA | %d APPART.",
-    n_log$partizioni, n_log$versioni, n_log$vigente, n_log$evolve,
-    n_log$cita, n_log$cita_atto, n_log$rimanda, n_log$appartiene
+    "<<< %d part. | %d vers. | %d HA_VERSIONE | %d EVOLVE | %d CITA | %d CITA_ATTO | %d RIMANDA | %d APPART. | %d SOTTO_PART.",
+    n_log$partizioni, n_log$versioni, n_log$ha_versione, n_log$evolve,
+    n_log$cita, n_log$cita_atto, n_log$rimanda, n_log$appartiene, n_log$sotto_part
   ))
-}
+  
+} 
 
 # Consolidamento
 
@@ -349,19 +411,20 @@ leggi_partial <- function(prefisso, id_col = NULL) {
   else unique(dt)
 }
 
-df_nodi_Partizioni  <- as.data.frame(leggi_partial("nodi_Partizioni", "partizione_id:ID(Partizione)"))
-df_nodi_Versione    <- as.data.frame(leggi_partial("nodi_Versione",   "versione_id:ID(Versione)"))
-df_archi_VIGENTE    <- as.data.frame(leggi_partial("archi_VIGENTE"))
-df_archi_EVOLVE_IN  <- as.data.frame(leggi_partial("archi_EVOLVE_IN"))
-df_archi_CITA       <- as.data.frame(leggi_partial("archi_CITA"))
-df_archi_CITA_ATTO  <- as.data.frame(leggi_partial("archi_CITA_ATTO"))
-df_archi_RIMANDA_A  <- as.data.frame(leggi_partial("archi_RIMANDA_A"))
-df_archi_APPARTIENE <- as.data.frame(leggi_partial("archi_APPARTIENE"))
+df_nodi_Partizioni   <- as.data.frame(leggi_partial("nodi_Partizioni", "partizione_id:ID(Partizione)"))
+df_nodi_Versione     <- as.data.frame(leggi_partial("nodi_Versione",   "versione_id:ID(Versione)"))
+df_archi_HA_VERSIONE <- as.data.frame(leggi_partial("archi_HA_VERSIONE"))
+df_archi_EVOLVE_IN   <- as.data.frame(leggi_partial("archi_EVOLVE_IN"))
+df_archi_CITA        <- as.data.frame(leggi_partial("archi_CITA"))
+df_archi_CITA_ATTO   <- as.data.frame(leggi_partial("archi_CITA_ATTO"))
+df_archi_RIMANDA_A   <- as.data.frame(leggi_partial("archi_RIMANDA_A"))
+df_archi_APPARTIENE  <- as.data.frame(leggi_partial("archi_APPARTIENE"))
+df_archi_SOTTO_PARTIZIONE <- as.data.frame(leggi_partial("archi_SOTTO_PARTIZIONE"))
 
 message(sprintf(
-  "\n=== Master loop completato ===\n  Partizioni  : %d\n  Versioni    : %d\n  VIGENTE     : %d\n  EVOLVE_IN   : %d\n  CITA_NORMA  : %d\n  CITA_ATTO   : %d\n  RIMANDA_A   : %d\n  APPARTIENE  : %d",
+  "\n=== Master loop completato ===\n  Partizioni  : %d\n  Versioni    : %d\n  HA_VERSIONE : %d\n  EVOLVE_IN   : %d\n  CITA_NORMA  : %d\n  CITA_ATTO   : %d\n  RIMANDA_A   : %d\n  APPARTIENE  : %d\n  SOTTO_PART  : %d",
   nrow(df_nodi_Partizioni), nrow(df_nodi_Versione),
-  nrow(df_archi_VIGENTE),   nrow(df_archi_EVOLVE_IN),
+  nrow(df_archi_HA_VERSIONE), nrow(df_archi_EVOLVE_IN),
   nrow(df_archi_CITA),      nrow(df_archi_CITA_ATTO),
-  nrow(df_archi_RIMANDA_A), nrow(df_archi_APPARTIENE)
+  nrow(df_archi_RIMANDA_A), nrow(df_archi_APPARTIENE), nrow(df_archi_SOTTO_PARTIZIONE)
 ))
