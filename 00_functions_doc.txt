@@ -1,0 +1,169 @@
+DOCUMENTAZIONE FUNZIONI — 00_functions.R
+========================================
+
+
+ESTRAZIONE E VALIDAZIONE METADATI
+----------------------------------
+
+get_akn_uri(nodo, uri_padre_corrente)
+  Costruisce l'URI completo di un nodo AKN. Prima cerca il blocco
+  FRBRWork/FRBRthis dentro il nodo stesso; se non lo trova, usa l'attributo
+  eId (o id come fallback) e lo appende all'URI del nodo padre separato da
+  "#". Usata per costruire gli identificatori univoci degli articoli nel grafo.
+
+normalize_act_type(raw_type)
+  Prende il tipo di atto come scritto nel nome della cartella (es.
+  "DECRETO_LEGISLATIVO" o "Regio Decreto") e lo converte nel formato URN NIR
+  standard tutto minuscolo con punti (es. "decreto.legislativo",
+  "regio.decreto"). Rimuove spazi, underscore e trattini e li sostituisce
+  con punti.
+
+parse_folder_date(raw_date_str)
+  Valida una stringa data in formato YYYYMMDD (es. "19920430"). Converte in
+  oggetto Date R e verifica che il formato sia corretto — se la data è
+  malformata (es. "19921340") restituisce NA invece di dare errore silenzioso.
+
+extract_urn_from_xml(doc)
+  Legge l'URN NIR ufficiale dell'atto dal blocco XML
+  FRBRWork/FRBRalias[@name='urn:nir']. Questo è l'identificatore canonico
+  dichiarato da Normattiva nell'XML, che viene poi confrontato con quello
+  ricavato dal nome della cartella per rilevare discrepanze.
+
+.extract_akn_metadata_impl(folder_path)
+  Scansiona i file XML di una cartella e, dal primo XML valido che contiene
+  un URN NIR, estrae: URN NIR, ELI (European Legislation Identifier), titolo
+  AKN, data di vigenza e data dell'atto. Il prefisso "." indica che è una
+  funzione interna — viene chiamata solo da extract_akn_metadata.
+
+extract_akn_metadata(folder_path)
+  Versione memoizzata di .extract_akn_metadata_impl. La memoizzazione
+  (tramite il pacchetto memoise) fa sì che se la stessa cartella viene
+  elaborata più volte, il risultato viene restituito dalla cache invece di
+  rileggere i file XML da disco. Importante per le performance dato che ogni
+  atto può avere centinaia di file XML.
+
+build_act_metadata(folder_name, folder_path)
+  Funzione principale di costruzione dei metadati di un atto. Partendo dal
+  nome della cartella (es. "DECRETO LEGISLATIVO_19920430_285") estrae tipo
+  atto, data e numero; costruisce l'URN da cartella; chiama
+  extract_akn_metadata per i metadati dall'XML; confronta i due URN per
+  rilevare discrepanze; cerca l'atto nella lista CODICI_PRINCIPALI per
+  assegnare nome comune e codice breve. Restituisce un dataframe con una
+  riga per atto, che è la base di tutto il resto della pipeline.
+
+
+TIMELINE E VERSIONI
+--------------------
+
+build_timeline(file_xml, data_originale)
+  Dato l'elenco dei file XML di un atto, costruisce la sua timeline
+  cronologica. Per ogni file estrae la data di vigenza dal nome del file
+  (pattern "_VIGENZA_YYYY-MM-DD_") e il numero di versione (pattern "_V123").
+  Ordina i file per data, calcola le date di fine validità di ogni versione
+  (= giorno prima dell'inizio della versione successiva), determina lo stato
+  di vigenza (VIGENTE / STORICO) e, dall'ultimo file XML, estrae gli URN
+  delle leggi che hanno modificato l'atto leggendo il blocco
+  references/passiveRef. Restituisce un dataframe con una riga per file XML,
+  che il master loop usa per iterare sulle versioni.
+
+
+IDENTIFICAZIONE NODI
+---------------------
+
+extract_node_id(nodo_xml, testo_incipit)
+  Assegna un identificatore stabile a un nodo articolo. Funziona a cascata
+  su tre metodi:
+  1. STRUTTURALE: legge l'attributo eId (es. "art_116") — il caso normale
+     per gli XML Akoma Ntoso ben formati.
+  2. TESTUALE: se eId manca, cerca nel testo dell'incipit una formula tipo
+     "Art. 116" o "Articolo 116" e costruisce l'id da lì.
+  3. HASH: se neanche il testo aiuta, calcola un hash CRC32 dell'incipit e
+     usa quello come identificatore — garantisce unicità ma non leggibilità.
+  Restituisce sempre id_pulito (es. "art_116"), numero_formattato (es.
+  "Art. 116") e il metodo usato.
+
+extract_allegato_meta(attachment_node)
+  Estrae i metadati di un nodo allegato: nome, URN NIR (se presente nel
+  blocco FRBRWork interno), id grezzo e label leggibile. Usata nel master
+  loop per gestire gli allegati strutturati come <doc> dentro <attachment>,
+  che hanno una logica di identificazione diversa dagli articoli normali.
+
+extract_gerarchia(nodo_xml)
+  Risale la struttura XML dell'articolo e raccoglie i metadati dei livelli
+  gerarchici che lo contengono: libro, parte, titolo, capo, sezione. Per
+  ognuno estrae numero e titolo (heading). Usata per popolare le colonne
+  gerarchiche del nodo Partizione nel grafo, che permettono query tipo
+  "tutti gli articoli del Titolo III del Codice Civile".
+
+
+CLASSIFICAZIONE
+----------------
+
+classifica_stato_norma(testo_completo, testo_low)
+  Determina se una norma è ATTIVA, PARZIALMENTE_ABROGATA o ABROGATA
+  analizzando il testo con tre pattern:
+  - RX_SOLO_ABROGATO: testi brevissimi tipo "(abrogato)" o "abrogata."
+  - RX_ABROGATO_TOTALE: incipit tipo "articolo abrogato dalla L. ..."
+  - is_formula_normattiva: formula Normattiva con doppia parentesi tipo
+    "((ARTICOLO ABROGATO DALLA L. 5 AGOSTO 1981, N. 442))" — include
+    anche il typo "ARITCOLO" presente in alcuni XML sorgente.
+  Se uno dei pattern di abrogazione totale scatta, non controlla l'abrogazione
+  parziale (un articolo non può essere allo stesso tempo totalmente e
+  parzialmente abrogato).
+
+classifica_tipo_modifica(testo_completo, testo_low, is_originale, stato_norma)
+  Classifica il tipo di intervento legislativo che ha prodotto questa versione.
+  Scala di priorità: originale → abrogazione parziale → abrogazione totale →
+  soppressione → sostituzione (riconosciuta dai doppi parentesi "((" tipici
+  delle novelle) → integrazione → deroga → proroga → sospensione →
+  interpretazione autentica → estensione → modificato (catch-all).
+  Il risultato popola il campo tipo_modifica del nodo Versione e l'arco
+  EVOLVE_IN nel grafo.
+
+
+ESTRAZIONE TESTO E CITAZIONI
+------------------------------
+
+extract_testo_nodo(nodo_xml)
+  Estrae il testo pulito di un nodo articolo con tre fasi:
+  1. XPath mirato: cerca i tag <p> e <content> escludendo sezioni, note e
+     blocchi di modifiche (passiveModifications, activeModifications) che
+     contengono testo delle leggi modificanti, non della norma stessa.
+  2. Fallback: se il testo risultante è troppo breve, usa xml_text() sul
+     nodo intero — meno preciso ma garantisce un risultato.
+  3. Deduplicazione: il formato multivigente a volte duplica il testo nella
+     stessa stringa (prima metà = seconda metà). Se rileva questo pattern,
+     tronca alla prima metà. Tronca anche i testi oltre 100.000 caratteri.
+
+extract_article_numbers(text)
+  Estrae tutti i numeri di articolo citati esplicitamente nel testo, cercando
+  pattern tipo "art. 116", "artt. 12 e 13", "articoli 5, 6 e 7". Usata per
+  costruire gli archi RIMANDA_A tra allegati e articoli — quando un allegato
+  fa esplicito riferimento a un articolo, viene creata una relazione nel grafo.
+
+normalizza_href_a_urn(href)
+  Converte un href estratto dai tag <ref> dell'XML AKN in un URN NIR
+  normalizzato. Gestisce due formati in ingresso:
+  - URN NIR diretto (es. "urn:nir:stato:decreto.legislativo:1992-04-30;285")
+  - Path AKN (es. "/akn/it/act/decretoLegislativo/stato/1992-04-30/285/!main")
+  Per entrambi normalizza il tipo atto tramite ALIAS_TIPO_ATTO e normalizza
+  il frammento (es. "#art116" → "#art_116", "#allegato_a" → "#allegato_a").
+  Gestisce anche il carattere "~" usato da alcuni XML come separatore del
+  frammento al posto di "#". Usata per costruire gli archi CITA e CITA_ATTO
+  nel grafo.
+
+
+FUNZIONI DEPRECATE
+-------------------
+
+estrai_modificato_da(doc, versione_global_id)
+  Leggeva le modifiche attive (activeModifications) dall'XML per costruire
+  archi verso le leggi modificate. Sostituita da un approccio basato sulle
+  modifiche passive (passiveModifications) lette nella build_timeline, che
+  si è rivelato più affidabile con i dati di Normattiva.
+
+estrai_passive_modifications(doc)
+  Estrae le modifiche passive ricevute dall'atto (blocco
+  passiveModifications/textualMod). Attualmente non usata nel flusso
+  principale — la logica è stata integrata direttamente in build_timeline
+  per efficienza.
