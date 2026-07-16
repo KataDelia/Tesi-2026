@@ -1,0 +1,149 @@
+IMPORTAZIONE DEL GRAFO IN NEO4J — GUIDA ALLE QUERY
+=====================================================
+
+Questo file documenta le query Cypher usate per costruire il Temporal Knowledge
+Graph in Neo4j a partire dai CSV prodotti dalla pipeline R (03_export_neo4j.R).
+Le query vanno eseguite in ordine nel Neo4j Browser.
+
+
+PREREQUISITI
+-------------
+I file CSV devono essere copiati nella cartella import di Neo4j:
+  - macOS/Linux : ~/Library/Application Support/Neo4j Desktop/.../import/
+  - oppure      : il path mostrato in Neo4j Desktop sotto "Open Folder > Import"
+
+File richiesti:
+  nodi_Legge.csv, nodi_Partizioni.csv, nodi_Versione.csv,
+  archi_APPARTIENE.csv, archi_SOTTO_PARTIZIONE.csv, archi_HA_VERSIONE.csv,
+  archi_EVOLVE_IN.csv, archi_ABROGATO_DA.csv, archi_CITA.csv,
+  archi_CITA_ATTO.csv, archi_RIMANDA_A.csv
+
+
+STEP 0 — PULIZIA DEL GRAFO ESISTENTE
+--------------------------------------
+Da eseguire solo se si vuole ripartire da zero. Elimina tutti gli archi
+e tutti i nodi in batch da 100.000 per evitare out-of-memory, poi rimuove
+tutti i constraint e gli indici esistenti.
+
+  :auto
+  MATCH ()-[r]->()
+  CALL (r) { DELETE r } IN TRANSACTIONS OF 100000 ROWS;
+
+  :auto
+  MATCH (n)
+  CALL (n) { DETACH DELETE n } IN TRANSACTIONS OF 100000 ROWS;
+
+  DROP CONSTRAINT legge_urn_unique IF EXISTS;
+  DROP CONSTRAINT partizione_id_unique IF EXISTS;
+  DROP CONSTRAINT versione_id_unique IF EXISTS;
+  DROP INDEX legge_nome_comune IF EXISTS;
+  ... (vedi script completo)
+
+
+STEP 1 — CONSTRAINT E INDICI
+------------------------------
+Crea i constraint di unicità sugli identificatori primari dei tre tipi di
+nodo. I constraint servono a due scopi: garantire che non esistano duplicati
+nel grafo, e accelerare le operazioni MERGE che usano questi campi come
+chiave di ricerca. Vanno creati PRIMA dell'importazione dei dati.
+
+  CREATE CONSTRAINT unique_legge      FOR (l:Legge)      REQUIRE l.id IS UNIQUE;
+  CREATE CONSTRAINT unique_partizione FOR (p:Partizione) REQUIRE p.id IS UNIQUE;
+  CREATE CONSTRAINT unique_versione   FOR (v:Versione)   REQUIRE v.id IS UNIQUE;
+
+
+STEP 2 — NODI LEGGE
+---------------------
+Importa i 40 atti normativi come nodi :Legge. Ogni nodo rappresenta un atto
+contenitore (il Codice Civile, il Codice della Strada, ecc.) indipendentemente
+dalle sue versioni. Per gli atti che sono codici principali (is_codice = TRUE)
+viene aggiunta dinamicamente anche la label :Codice, che permette query mirate
+solo sui codici. Usa MERGE invece di CREATE per essere idempotente — se il nodo
+esiste già, aggiorna le proprietà invece di duplicarlo.
+
+
+STEP 3 — NODI PARTIZIONE
+--------------------------
+Importa gli articoli come nodi :Partizione — l'entità stabile che rappresenta
+l'identità di un articolo attraverso il tempo, indipendentemente dalle sue
+versioni storiche. La query è spezzata in quattro passaggi separati per evitare
+l'operatore Eager di Neo4j (che con LOAD CSV su file grandi può consumare tutta
+la RAM disponibile):
+  1. Crea i nodi con tutte le proprietà
+  2. Aggiunge la label :Articolo ai nodi con tipo_partizione = 'articolo'
+  3. Aggiunge la label :Paragrafo ai nodi con tipo_partizione = 'paragrafo'
+  4. Aggiunge la label :Allegato  ai nodi con tipo_partizione = 'allegato'
+Le label multiple permettono query filtrate per tipo senza aggiungere proprietà.
+
+
+STEP 4 — NODI VERSIONE
+------------------------
+Importa le versioni degli articoli come nodi :Versione. Ogni nodo rappresenta
+il testo di un articolo in un determinato periodo di validità, dopo la delta
+detection che ha eliminato le versioni duplicate. Contiene il testo completo
+(testo_puro), le date di validità (valido_dal, valido_al in formato YYYYMMDD
+intero per filtraggio efficiente con range), lo stato di vigenza e il tipo di
+modifica che ha prodotto questa versione.
+
+
+STEP 5 — ARCHI
+---------------
+
+APPARTIENE (Partizione -> Legge)
+  Collega ogni articolo all'atto normativo che lo contiene. Relazione 
+  molti-a-uno: molti articoli appartengono a una legge. Permette query tipo
+  "tutti gli articoli del Codice Civile".
+
+SOTTO_ELEMENTO_DI (Partizione -> Partizione)
+  Collega gli articoli degli allegati all'allegato contenitore. Modella la
+  gerarchia interna degli allegati strutturati come <doc> in Akoma Ntoso.
+
+HA_VERSIONE (Partizione -> Versione)
+  Collega ogni articolo a tutte le sue versioni storiche. È la relazione
+  centrale del modello temporale — porta le date di validità e lo stato di
+  vigenza della versione. Per rispondere a "qual era il testo nel 1993" si
+  filtra su questa relazione cercando la versione con valido_dal <= 19930101
+  e valido_al >= 19930101.
+
+EVOLVE_IN (Versione -> Versione)
+  Collega versioni consecutive dello stesso articolo in ordine cronologico.
+  Porta il tipo di modifica (sostituzione, integrazione, abrogazione...) e
+  l'URN della legge che ha causato il cambiamento. Permette di ricostruire
+  la traiettoria storica di una norma seguendo la catena di relazioni.
+
+ABROGATO_DA (Partizione -> Legge)
+  Collega gli articoli abrogati alla legge che li ha abrogati, con la data
+  di abrogazione. Permette query tipo "quali articoli ha abrogato questa
+  legge?" e "quando è stato abrogato questo articolo?".
+
+CITA (Versione -> Partizione)
+  Collega una versione di un articolo agli articoli che cita esplicitamente
+  nel testo, estratti dai tag <ref> dell'XML Akoma Ntoso. Porta le date di
+  validità della citazione. Usata per l'arricchimento contestuale nel RAG:
+  quando si recupera un articolo rilevante, si possono espandere i contesti
+  seguendo le citazioni nel grafo.
+
+CITA_ATTO (Versione -> Legge)
+  Come CITA, ma per riferimenti a interi atti normativi invece che a singoli
+  articoli. Distingue le citazioni a livello di atto da quelle a livello di
+  articolo specifico.
+
+RIMANDA_A (Partizione -> Partizione)
+  Collega gli allegati agli articoli che li richiamano esplicitamente nel
+  testo. Estratta dai numeri di articolo citati nel titolo o nell'incipit
+  dell'allegato. Permette la navigazione bidirezionale tra articoli e allegati.
+
+
+NOTE OPERATIVE
+---------------
+- Le query di importazione archi usano MATCH invece di MERGE sui nodi:
+  se un nodo referenziato nel CSV non esiste nel grafo, la riga viene
+  silenziosamente ignorata invece di generare un errore. Questo è il
+  comportamento desiderato per gestire eventuali riferimenti a leggi
+  non incluse nel corpus dei 40 codici.
+- I valori valido_dal e valido_al sono stored come interi YYYYMMDD per
+  permettere confronti con range query efficienti (>, <, >=, <=) senza
+  conversioni di tipo a runtime.
+- Dopo l'importazione completa è consigliabile eseguire:
+    CALL db.stats.retrieve('GRAPH COUNTS')
+  per verificare i conteggi di nodi e relazioni.
